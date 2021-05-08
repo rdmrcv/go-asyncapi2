@@ -14,11 +14,11 @@ import (
 type T struct {
 	openapi3.ExtensionProps
 	AsyncAPI     string                 `json:"asyncapi" yaml:"asyncapi"`
-	ID           string                 `json:"id" yaml:"id"`
+	ID           string                 `json:"id,omitempty" yaml:"id,omitempty"`
 	Info         *openapi3.Info         `json:"info" yaml:"info"`
 	Servers      Servers                `json:"servers,omitempty" yaml:"servers,omitempty"`
-	Channels     Channels               `json:"channels" yaml:"channels"`
-	Components   Components             `json:"components,omitempty" yaml:"components,omitempty"`
+	Channels     Channels               `json:"channels,omitempty" yaml:"channels,omitempty"`
+	Components   *Components             `json:"components,omitempty" yaml:"components,omitempty"`
 	Tags         openapi3.Tags          `json:"tags,omitempty" yaml:"tags,omitempty"`
 	ExternalDocs *openapi3.ExternalDocs `json:"externalDocs,omitempty" yaml:"externalDocs,omitempty"`
 }

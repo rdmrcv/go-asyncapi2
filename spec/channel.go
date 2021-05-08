@@ -36,11 +36,11 @@ func (h Channels) Validate(ctx context.Context) error {
 // Channel is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#channel-item-object
 type Channel struct {
 	openapi3.ExtensionProps
-	Description string              `json:"description" yaml:"description"`
-	Subscribe   *OperationRef       `json:"subscribe" yaml:"subscribe"`
-	Publish     *OperationRef       `json:"publish" yaml:"publish"`
-	Parameters  ParametersRefs      `json:"parameters" yaml:"parameters"`
-	Bindings    *ChannelBindingsRef `json:"bindings" yaml:"bindings"`
+	Description string              `json:"description,omitempty" yaml:"description,omitempty"`
+	Subscribe   *OperationRef       `json:"subscribe,omitempty" yaml:"subscribe,omitempty"`
+	Publish     *OperationRef       `json:"publish,omitempty" yaml:"publish,omitempty"`
+	Parameters  ParametersRefs      `json:"parameters,omitempty" yaml:"parameters,omitempty"`
+	Bindings    *ChannelBindingsRef `json:"bindings,omitempty" yaml:"bindings,omitempty"`
 }
 
 func (value *Channel) MarshalJSON() ([]byte, error) {

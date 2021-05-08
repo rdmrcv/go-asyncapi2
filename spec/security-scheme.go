@@ -26,7 +26,7 @@ type OAuthFlowObject struct {
 	openapi3.ExtensionProps
 	AuthorizationUrl string            `json:"authorizationUrl" yaml:"authorizationUrl"`
 	TokenUrl         string            `json:"tokenUrl" yaml:"tokenUrl"`
-	RefreshUrl       string            `json:"refreshUrl" yaml:"refreshUrl"`
+	RefreshUrl       string            `json:"refreshUrl,omitempty" yaml:"refreshUrl,omitempty"`
 	Scopes           map[string]string `json:"scopes" yaml:"scopes"`
 }
 
@@ -41,10 +41,10 @@ func (value *OAuthFlowObject) UnmarshalJSON(data []byte) error {
 // OAuthFlows is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#oauthFlowsObject
 type OAuthFlows struct {
 	openapi3.ExtensionProps
-	Implicit          *OAuthFlowObject `json:"implicit" yaml:"implicit"`
-	Password          *OAuthFlowObject `json:"password" yaml:"password"`
-	ClientCredentials *OAuthFlowObject `json:"clientCredentials" yaml:"clientCredentials"`
-	AuthorizationCode *OAuthFlowObject `json:"authorizationCode" yaml:"authorizationCode"`
+	Implicit          *OAuthFlowObject `json:"implicit,omitempty" yaml:"implicit,omitempty"`
+	Password          *OAuthFlowObject `json:"password,omitempty" yaml:"password,omitempty"`
+	ClientCredentials *OAuthFlowObject `json:"clientCredentials,omitempty" yaml:"clientCredentials,omitempty"`
+	AuthorizationCode *OAuthFlowObject `json:"authorizationCode,omitempty" yaml:"authorizationCode,omitempty"`
 }
 
 func (value *OAuthFlows) MarshalJSON() ([]byte, error) {
@@ -59,11 +59,11 @@ func (value *OAuthFlows) UnmarshalJSON(data []byte) error {
 type SecurityScheme struct {
 	openapi3.ExtensionProps
 	Type             string      `json:"type" yaml:"type"`
-	Description      string      `json:"description" yaml:"description"`
+	Description      string      `json:"description,omitempty" yaml:"description,omitempty"`
 	Name             string      `json:"name" yaml:"name"`
 	In               string      `json:"in" yaml:"in"`
 	Scheme           string      `json:"scheme" yaml:"scheme"`
-	BearerFormat     string      `json:"bearerFormat" yaml:"bearerFormat"`
+	BearerFormat     string      `json:"bearerFormat,omitempty" yaml:"bearerFormat,omitempty"`
 	Flows            *OAuthFlows `json:"flows" yaml:"flows"`
 	OpenIDConnectUrl string      `json:"openIdConnectUrl" yaml:"openIdConnectUrl"`
 }

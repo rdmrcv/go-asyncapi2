@@ -25,12 +25,12 @@ func (h OperationsTraits) JSONLookup(token string) (interface{}, error) {
 // OperationTrait is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#operationTraitObject
 type OperationTrait struct {
 	openapi3.ExtensionProps
-	OperationID  string                 `json:"operationId" yaml:"operationId"`
-	Summary      string                 `json:"summary" yaml:"summary"`
-	Description  string                 `json:"description" yaml:"description"`
-	Tags         openapi3.Tags          `json:"tags" yaml:"tags"`
-	ExternalDocs *openapi3.ExternalDocs `json:"externalDocs" yaml:"externalDocs"`
-	Bindings     *OperationBindings     `json:"bindings" yaml:"bindings"`
+	OperationID  string                 `json:"operationId,omitempty" yaml:"operationId,omitempty"`
+	Summary      string                 `json:"summary,omitempty" yaml:"summary,omitempty"`
+	Description  string                 `json:"description,omitempty" yaml:"description,omitempty"`
+	Tags         openapi3.Tags          `json:"tags,omitempty" yaml:"tags,omitempty"`
+	ExternalDocs *openapi3.ExternalDocs `json:"externalDocs,omitempty" yaml:"externalDocs,omitempty"`
+	Bindings     *OperationBindings     `json:"bindings,omitempty" yaml:"bindings,omitempty"`
 }
 
 func (value *OperationTrait) MarshalJSON() ([]byte, error) {
@@ -55,8 +55,8 @@ func (value *OperationTrait) Validate(ctx context.Context) error {
 type Operation struct {
 	OperationTrait
 
-	Traits  []*OperationTraitRef `json:"traits" yaml:"traits"`
-	Message *MessageOneOf        `json:"message" yaml:"message"`
+	Traits  []*OperationTraitRef `json:"traits,omitempty" yaml:"traits,omitempty"`
+	Message *MessageOneOf        `json:"message,omitempty" yaml:"message,omitempty"`
 }
 
 func (value *Operation) MarshalJSON() ([]byte, error) {

@@ -49,9 +49,9 @@ func (h ParametersRefs) JSONLookup(token string) (interface{}, error) {
 // Parameter is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#parameterObject
 type Parameter struct {
 	openapi3.ExtensionProps
-	Description string           `json:"description" yaml:"description"`
-	Schema      *openapi3.Schema `json:"schema" yaml:"schema"`
-	Location    string           `json:"location" yaml:"location"`
+	Description string           `json:"description,omitempty" yaml:"description,omitempty"`
+	Schema      *openapi3.Schema `json:"schema,omitempty" yaml:"schema,omitempty"`
+	Location    string           `json:"location,omitempty" yaml:"location,omitempty"`
 }
 
 func (value *Parameter) MarshalJSON() ([]byte, error) {

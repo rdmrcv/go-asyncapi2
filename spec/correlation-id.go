@@ -26,7 +26,7 @@ func (h CorrelationIDs) JSONLookup(token string) (interface{}, error) {
 // CorrelationID is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#correlationIdObject
 type CorrelationID struct {
 	openapi3.ExtensionProps
-	Description string `json:"description" yaml:"description"`
+	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 	Location    string `json:"location" yaml:"location"`
 }
 

@@ -50,10 +50,10 @@ var _ jsoninfo.StrictStruct = &HttpOperation{}
 // HttpOperation is defined in AsyncAPI spec: https://github.com/asyncapi/bindings/tree/master/http#operation-binding-object
 type HttpOperation struct {
 	openapi3.ExtensionProps
-	Type           HttpOperationBindingType `json:"type" yaml:"type"`
-	Method         string                   `json:"method" yaml:"method"`
-	Query          *openapi3.Schema         `json:"query" yaml:"query"`
-	BindingVersion string                   `json:"bindingVersion" yaml:"bindingVersion"`
+	Type           HttpOperationBindingType `json:"type,omitempty" yaml:"type,omitempty"`
+	Method         string                   `json:"method,omitempty" yaml:"method,omitempty"`
+	Query          *openapi3.Schema         `json:"query,omitempty" yaml:"query,omitempty"`
+	BindingVersion string                   `json:"bindingVersion,omitempty" yaml:"bindingVersion,omitempty"`
 }
 
 func (binding *HttpOperation) MarshalJSON() ([]byte, error) {
@@ -102,8 +102,8 @@ var _ jsoninfo.StrictStruct = &HttpMessage{}
 // HttpMessage is defined in AsyncAPI spec: https://github.com/asyncapi/bindings/tree/master/http#message-binding-object
 type HttpMessage struct {
 	openapi3.ExtensionProps
-	Headers        *openapi3.Schema `json:"headers" yaml:"headers"`
-	BindingVersion string           `json:"bindingVersion" yaml:"bindingVersion"`
+	Headers        *openapi3.Schema `json:"headers,omitempty" yaml:"headers,omitempty"`
+	BindingVersion string           `json:"bindingVersion,omitempty" yaml:"bindingVersion,omitempty"`
 }
 
 func (value *HttpMessage) MarshalJSON() ([]byte, error) {

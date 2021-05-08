@@ -9,7 +9,7 @@ import (
 )
 
 type oneOfField struct {
-	OneOf []json.RawMessage `json:"oneOf" yaml:"oneOf"`
+	OneOf []json.RawMessage `json:"oneOf,omitempty" yaml:"oneOf,omitempty"`
 }
 
 type MessageOneOf struct {

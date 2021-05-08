@@ -13,17 +13,17 @@ import (
 type Components struct {
 	openapi3.ExtensionProps
 
-	Schemas           openapi3.Schemas   `json:"schemas" yaml:"schemas"`
-	Messages          Messages           `json:"messages" yaml:"messages"`
-	SecuritySchemes   SecuritySchemes    `json:"securitySchemes" yaml:"securitySchemes"`
-	Parameters        Parameters         `json:"parameters" yaml:"parameters"`
-	CorrelationIds    CorrelationIDs     `json:"correlationIds" yaml:"correlationIds"`
-	OperationTraits   OperationsTraits   `json:"operationTraits" yaml:"operationTraits"`
-	MessageTraits     MessagesTraits     `json:"messageTraits" yaml:"messageTraits"`
-	ServerBindings    ServersBindings    `json:"serverBindings" yaml:"serverBindings"`
-	ChannelBindings   ChannelsBindings   `json:"channelBindings" yaml:"channelBindings"`
-	OperationBindings OperationsBindings `json:"operationBindings" yaml:"operationBindings"`
-	MessageBindings   MessagesBindings   `json:"messageBindings" yaml:"messageBindings"`
+	Schemas           openapi3.Schemas   `json:"schemas,omitempty" yaml:"schemas,omitempty"`
+	Messages          Messages           `json:"messages,omitempty" yaml:"messages,omitempty"`
+	SecuritySchemes   SecuritySchemes    `json:"securitySchemes,omitempty" yaml:"securitySchemes,omitempty"`
+	Parameters        Parameters         `json:"parameters,omitempty" yaml:"parameters,omitempty"`
+	CorrelationIds    CorrelationIDs     `json:"correlationIds,omitempty" yaml:"correlationIds,omitempty"`
+	OperationTraits   OperationsTraits   `json:"operationTraits,omitempty" yaml:"operationTraits,omitempty"`
+	MessageTraits     MessagesTraits     `json:"messageTraits,omitempty" yaml:"messageTraits,omitempty"`
+	ServerBindings    ServersBindings    `json:"serverBindings,omitempty" yaml:"serverBindings,omitempty"`
+	ChannelBindings   ChannelsBindings   `json:"channelBindings,omitempty" yaml:"channelBindings,omitempty"`
+	OperationBindings OperationsBindings `json:"operationBindings,omitempty" yaml:"operationBindings,omitempty"`
+	MessageBindings   MessagesBindings   `json:"messageBindings,omitempty" yaml:"messageBindings,omitempty"`
 }
 
 func (components *Components) MarshalJSON() ([]byte, error) {

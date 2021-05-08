@@ -49,12 +49,19 @@ func (servers Servers) MatchURL(parsedURL *url.URL) (*Server, []string, string) 
 	return nil, nil, ""
 }
 
+// SecurityRequirements is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#securityRequirementObject
+type SecurityRequirements map[string][]string
+
 // Server is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#serverObject
 type Server struct {
 	openapi3.ExtensionProps
-	URL         string                     `json:"url" yaml:"url"`
-	Description string                     `json:"description,omitempty" yaml:"description,omitempty"`
-	Variables   map[string]*ServerVariable `json:"variables,omitempty" yaml:"variables,omitempty"`
+	URL             string                     `json:"url" yaml:"url"`
+	Protocol        string                     `json:"protocol" yaml:"protocol"`
+	ProtocolVersion string                     `json:"protocolVersion,omitempty" yaml:"protocolVersion,omitempty"`
+	Description     string                     `json:"description,omitempty" yaml:"description,omitempty"`
+	Security        []SecurityRequirements     `json:"security,omitempty" yaml:"security,omitempty"`
+	Bindings        *ServerBindings            `json:"bindings,omitempty" yaml:"bindings,omitempty"`
+	Variables       map[string]*ServerVariable `json:"variables,omitempty" yaml:"variables,omitempty"`
 }
 
 func (value *Server) MarshalJSON() ([]byte, error) {
@@ -156,6 +163,12 @@ func (value *Server) Validate(ctx context.Context) (err error) {
 		}
 		if err = v.Validate(ctx); err != nil {
 			return
+		}
+	}
+
+	if v := value.Bindings; v != nil {
+		if err := v.Validate(ctx); err != nil {
+			return err
 		}
 	}
 

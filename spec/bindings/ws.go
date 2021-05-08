@@ -23,10 +23,10 @@ var _ jsoninfo.StrictStruct = &WsChannel{}
 // WsChannel is defined in AsyncAPI spec: https://github.com/asyncapi/bindings/tree/master/websockets#channel-binding-object
 type WsChannel struct {
 	openapi3.ExtensionProps
-	Method         string
-	Query          *openapi3.Schema
-	Headers        *openapi3.Schema
-	BindingVersion string
+	Method         string           `json:"method,omitempty" yaml:"method,omitempty"`
+	Query          *openapi3.Schema `json:"query,omitempty" yaml:"query,omitempty"`
+	Headers        *openapi3.Schema `json:"headers,omitempty" yaml:"headers,omitempty"`
+	BindingVersion string           `json:"bindingVersion,omitempty" yaml:"bindingVersion,omitempty"`
 }
 
 func (binding *WsChannel) MarshalJSON() ([]byte, error) {
