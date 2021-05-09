@@ -2,14 +2,19 @@ package spec
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/getkin/kin-openapi/jsoninfo"
 	"github.com/go-openapi/jsonpointer"
 )
 
+var (
+	ErrUnresolvedRef = errors.New("found unresolved ref")
+)
+
 func foundUnresolvedRef(ref string) error {
-	return fmt.Errorf("found unresolved ref: %q", ref)
+	return fmt.Errorf("%q is not resolved: %w", ref, ErrUnresolvedRef)
 }
 
 type ChannelRef struct {
@@ -31,6 +36,7 @@ func (value *ChannelRef) Validate(ctx context.Context) error {
 	if v := value.Value; v != nil {
 		return v.Validate(ctx)
 	}
+
 	return foundUnresolvedRef(value.Ref)
 }
 
@@ -166,6 +172,7 @@ func (value OperationTraitRef) JSONLookup(token string) (interface{}, error) {
 	ptr, _, err := jsonpointer.GetForToken(value.Value, token)
 	return ptr, err
 }
+
 type OperationRef struct {
 	Ref   string
 	Value *Operation

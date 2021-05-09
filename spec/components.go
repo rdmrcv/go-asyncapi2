@@ -44,7 +44,88 @@ func (components *Components) Validate(ctx context.Context) (err error) {
 		}
 	}
 
+	for k, v := range components.Messages {
+		if err = ValidateIdentifier(k); err != nil {
+			return
+		}
+		if err = v.Validate(ctx); err != nil {
+			return
+		}
+	}
+
+	for k, v := range components.SecuritySchemes {
+		if err = ValidateIdentifier(k); err != nil {
+			return
+		}
+		if err = v.Validate(ctx); err != nil {
+			return
+		}
+	}
+
 	for k, v := range components.Parameters {
+		if err = ValidateIdentifier(k); err != nil {
+			return
+		}
+		if err = v.Validate(ctx); err != nil {
+			return
+		}
+	}
+
+	for k, v := range components.CorrelationIds {
+		if err = ValidateIdentifier(k); err != nil {
+			return
+		}
+		if err = v.Validate(ctx); err != nil {
+			return
+		}
+	}
+
+	for k, v := range components.OperationTraits {
+		if err = ValidateIdentifier(k); err != nil {
+			return
+		}
+		if err = v.Validate(ctx); err != nil {
+			return
+		}
+	}
+
+	for k, v := range components.MessageTraits {
+		if err = ValidateIdentifier(k); err != nil {
+			return
+		}
+		if err = v.Validate(ctx); err != nil {
+			return
+		}
+	}
+
+	for k, v := range components.ServerBindings {
+		if err = ValidateIdentifier(k); err != nil {
+			return
+		}
+		if err = v.Validate(ctx); err != nil {
+			return
+		}
+	}
+
+	for k, v := range components.ChannelBindings {
+		if err = ValidateIdentifier(k); err != nil {
+			return
+		}
+		if err = v.Validate(ctx); err != nil {
+			return
+		}
+	}
+
+	for k, v := range components.OperationBindings {
+		if err = ValidateIdentifier(k); err != nil {
+			return
+		}
+		if err = v.Validate(ctx); err != nil {
+			return
+		}
+	}
+
+	for k, v := range components.MessageBindings {
 		if err = ValidateIdentifier(k); err != nil {
 			return
 		}

@@ -161,6 +161,7 @@ func (value *Server) Validate(ctx context.Context) (err error) {
 		if !strings.Contains(value.URL, fmt.Sprintf("{%s}", name)) {
 			return errors.New("server has undeclared variables")
 		}
+
 		if err = v.Validate(ctx); err != nil {
 			return
 		}
@@ -197,6 +198,7 @@ func (value *ServerVariable) Validate(context.Context) error {
 		if err != nil {
 			return err
 		}
+
 		return fmt.Errorf("field default is required in %s", data)
 	}
 

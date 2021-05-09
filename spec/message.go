@@ -36,36 +36,6 @@ func (h MessagesTraits) JSONLookup(token string) (interface{}, error) {
 	return value, nil
 }
 
-// MessagePayload tries to guess if a scheme serialized in the message payload
-// or its some generic object.
-type MessagePayload struct {
-	Any    map[string]interface{}
-	Schema *openapi3.Schema
-}
-
-func (m *MessagePayload) MarshalJSON() ([]byte, error) {
-	if m.Schema != nil {
-		return jsoninfo.MarshalStrictStruct(m.Schema)
-	}
-
-	return json.Marshal(m.Any)
-}
-
-func (m *MessagePayload) UnmarshalJSON(data []byte) error {
-	schema := openapi3.Schema{}
-
-	err := jsoninfo.UnmarshalStrictStruct(data, &schema)
-
-	if !schema.IsEmpty() {
-		m.Schema = &schema
-		return err
-	}
-
-	m.Any = map[string]interface{}{}
-
-	return json.Unmarshal(data, &m.Any)
-}
-
 // SchemaFormat tries to guess if a scheme serialized in the schemaFormat field
 // or its just schema name.
 type SchemaFormat struct {
@@ -99,7 +69,7 @@ type MessageTrait struct {
 	openapi3.ExtensionProps
 	Headers       *openapi3.SchemaRef    `json:"headers,omitempty" yaml:"headers,omitempty"`
 	CorrelationID *CorrelationIDRef      `json:"correlationId,omitempty" yaml:"correlationId,omitempty"`
-	SchemaFormat  *SchemaFormat           `json:"schemaFormat,omitempty" yaml:"schemaFormat,omitempty"`
+	SchemaFormat  *SchemaFormat          `json:"schemaFormat,omitempty" yaml:"schemaFormat,omitempty"`
 	ContentType   string                 `json:"contentType,omitempty" yaml:"contentType,omitempty"`
 	Name          string                 `json:"name,omitempty" yaml:"name,omitempty"`
 	Title         string                 `json:"title,omitempty" yaml:"title,omitempty"`
@@ -145,8 +115,8 @@ func (value *MessageTrait) Validate(ctx context.Context) error {
 type Message struct {
 	MessageTrait
 
-	Payload MessagePayload     `json:"payload,omitempty" yaml:"payload,omitempty"`
-	Traits  []*MessageTraitRef `json:"traits,omitempty" yaml:"traits,omitempty"`
+	Payload *openapi3.SchemaRef `json:"payload,omitempty" yaml:"payload,omitempty"`
+	Traits  []*MessageTraitRef  `json:"traits,omitempty" yaml:"traits,omitempty"`
 }
 
 func (value *Message) MarshalJSON() ([]byte, error) {
@@ -158,7 +128,7 @@ func (value *Message) UnmarshalJSON(data []byte) error {
 }
 
 func (value *Message) Validate(ctx context.Context) error {
-	if v := value.Payload.Schema; v != nil {
+	if v := value.Payload; v != nil {
 		if err := v.Validate(ctx); err != nil {
 			return err
 		}
