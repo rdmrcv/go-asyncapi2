@@ -1,4 +1,4 @@
-module github.com/ligser/asyncapi
+module github.com/ligser/go-asyncapi2
 
 go 1.16
 
