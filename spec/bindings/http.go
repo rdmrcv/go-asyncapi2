@@ -7,7 +7,7 @@ import (
 
 	"github.com/getkin/kin-openapi/jsoninfo"
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/ligser/asyncapi/spec/validate"
+	"github.com/ligser/go-asyncapi2/spec/validate"
 )
 
 // HttpServer is defined in AsyncAPI spec: https://github.com/asyncapi/bindings/tree/master/http#server-binding-object
