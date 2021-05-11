@@ -67,18 +67,18 @@ func (m *SchemaFormat) UnmarshalJSON(data []byte) error {
 // MessageTrait is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#message-trait-object
 type MessageTrait struct {
 	openapi3.ExtensionProps
-	Headers       *openapi3.SchemaRef    `json:"headers,omitempty" yaml:"headers,omitempty"`
-	CorrelationID *CorrelationIDRef      `json:"correlationId,omitempty" yaml:"correlationId,omitempty"`
-	SchemaFormat  *SchemaFormat          `json:"schemaFormat,omitempty" yaml:"schemaFormat,omitempty"`
-	ContentType   string                 `json:"contentType,omitempty" yaml:"contentType,omitempty"`
-	Name          string                 `json:"name,omitempty" yaml:"name,omitempty"`
-	Title         string                 `json:"title,omitempty" yaml:"title,omitempty"`
-	Summary       string                 `json:"summary,omitempty" yaml:"summary,omitempty"`
-	Description   string                 `json:"description,omitempty" yaml:"description,omitempty"`
-	Tags          openapi3.Tags          `json:"tags,omitempty" yaml:"tags,omitempty"`
-	ExternalDocs  *openapi3.ExternalDocs `json:"externalDocs,omitempty" yaml:"externalDocs,omitempty"`
-	Bindings      *MessageBindings       `json:"bindings,omitempty" yaml:"bindings,omitempty"`
-	Examples      []interface{}          `json:"examples,omitempty" yaml:"examples,omitempty"`
+	Headers       *openapi3.SchemaRef      `json:"headers,omitempty" yaml:"headers,omitempty"`
+	CorrelationID *CorrelationIDRef        `json:"correlationId,omitempty" yaml:"correlationId,omitempty"`
+	SchemaFormat  *SchemaFormat            `json:"schemaFormat,omitempty" yaml:"schemaFormat,omitempty"`
+	ContentType   string                   `json:"contentType,omitempty" yaml:"contentType,omitempty"`
+	Name          string                   `json:"name,omitempty" yaml:"name,omitempty"`
+	Title         string                   `json:"title,omitempty" yaml:"title,omitempty"`
+	Summary       string                   `json:"summary,omitempty" yaml:"summary,omitempty"`
+	Description   string                   `json:"description,omitempty" yaml:"description,omitempty"`
+	Tags          openapi3.Tags            `json:"tags,omitempty" yaml:"tags,omitempty"`
+	ExternalDocs  *openapi3.ExternalDocs   `json:"externalDocs,omitempty" yaml:"externalDocs,omitempty"`
+	Bindings      *MessageBindings         `json:"bindings,omitempty" yaml:"bindings,omitempty"`
+	Examples      []map[string]interface{} `json:"examples,omitempty" yaml:"examples,omitempty"`
 }
 
 func (value *MessageTrait) MarshalJSON() ([]byte, error) {
