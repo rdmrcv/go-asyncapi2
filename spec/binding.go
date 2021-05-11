@@ -26,19 +26,19 @@ func (h ServersBindings) JSONLookup(token string) (interface{}, error) {
 // ServerBindings is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#server-bindings-object
 type ServerBindings struct {
 	openapi3.ExtensionProps
-	Http  *bindings.HttpServer `json:"http,omitempty" yaml:"http,omitempty"`
-	Ws    *bindings.WsServer   `json:"ws,omitempty" yaml:"ws,omitempty"`
-	Kafka interface{}          `json:"kafka,omitempty" yaml:"kafka,omitempty"`
-	Amqp  interface{}          `json:"amqp,omitempty" yaml:"amqp,omitempty"`
-	Amqp1 interface{}          `json:"amqp1,omitempty" yaml:"amqp1,omitempty"`
-	Mqtt  interface{}          `json:"mqtt,omitempty" yaml:"mqtt,omitempty"`
-	Mqtt5 interface{}          `json:"mqtt5,omitempty" yaml:"mqtt5,omitempty"`
-	Nats  interface{}          `json:"nats,omitempty" yaml:"nats,omitempty"`
-	Jms   interface{}          `json:"jms,omitempty" yaml:"jms,omitempty"`
-	Sns   interface{}          `json:"sns,omitempty" yaml:"sns,omitempty"`
-	Sqs   interface{}          `json:"sqs,omitempty" yaml:"sqs,omitempty"`
-	Stomp interface{}          `json:"stomp,omitempty" yaml:"stomp,omitempty"`
-	Redis interface{}          `json:"redis,omitempty" yaml:"redis,omitempty"`
+	Http  *bindings.HttpServer  `json:"http,omitempty" yaml:"http,omitempty"`
+	Ws    *bindings.WsServer    `json:"ws,omitempty" yaml:"ws,omitempty"`
+	Kafka *bindings.KafkaServer `json:"kafka,omitempty" yaml:"kafka,omitempty"`
+	Amqp  interface{}           `json:"amqp,omitempty" yaml:"amqp,omitempty"`
+	Amqp1 interface{}           `json:"amqp1,omitempty" yaml:"amqp1,omitempty"`
+	Mqtt  interface{}           `json:"mqtt,omitempty" yaml:"mqtt,omitempty"`
+	Mqtt5 interface{}           `json:"mqtt5,omitempty" yaml:"mqtt5,omitempty"`
+	Nats  interface{}           `json:"nats,omitempty" yaml:"nats,omitempty"`
+	Jms   interface{}           `json:"jms,omitempty" yaml:"jms,omitempty"`
+	Sns   interface{}           `json:"sns,omitempty" yaml:"sns,omitempty"`
+	Sqs   interface{}           `json:"sqs,omitempty" yaml:"sqs,omitempty"`
+	Stomp interface{}           `json:"stomp,omitempty" yaml:"stomp,omitempty"`
+	Redis interface{}           `json:"redis,omitempty" yaml:"redis,omitempty"`
 }
 
 var _ jsonpointer.JSONPointable = (*ServerBindings)(nil)
@@ -117,19 +117,19 @@ func (h ChannelsBindings) JSONLookup(token string) (interface{}, error) {
 // ChannelBindings is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#channel-bindings-object
 type ChannelBindings struct {
 	openapi3.ExtensionProps
-	Http  *bindings.HttpChannel `json:"http,omitempty" yaml:"http,omitempty"`
-	Ws    *bindings.WsChannel   `json:"ws,omitempty" yaml:"ws,omitempty"`
-	Kafka interface{}           `json:"kafka,omitempty" yaml:"kafka,omitempty"`
-	Amqp  interface{}           `json:"amqp,omitempty" yaml:"amqp,omitempty"`
-	Amqp1 interface{}           `json:"amqp1,omitempty" yaml:"amqp1,omitempty"`
-	Mqtt  interface{}           `json:"mqtt,omitempty" yaml:"mqtt,omitempty"`
-	Mqtt5 interface{}           `json:"mqtt5,omitempty" yaml:"mqtt5,omitempty"`
-	Nats  interface{}           `json:"nats,omitempty" yaml:"nats,omitempty"`
-	Jms   interface{}           `json:"jms,omitempty" yaml:"jms,omitempty"`
-	Sns   interface{}           `json:"sns,omitempty" yaml:"sns,omitempty"`
-	Sqs   interface{}           `json:"sqs,omitempty" yaml:"sqs,omitempty"`
-	Stomp interface{}           `json:"stomp,omitempty" yaml:"stomp,omitempty"`
-	Redis interface{}           `json:"redis,omitempty" yaml:"redis,omitempty"`
+	Http  *bindings.HttpChannel  `json:"http,omitempty" yaml:"http,omitempty"`
+	Ws    *bindings.WsChannel    `json:"ws,omitempty" yaml:"ws,omitempty"`
+	Kafka *bindings.KafkaChannel `json:"kafka,omitempty" yaml:"kafka,omitempty"`
+	Amqp  interface{}            `json:"amqp,omitempty" yaml:"amqp,omitempty"`
+	Amqp1 interface{}            `json:"amqp1,omitempty" yaml:"amqp1,omitempty"`
+	Mqtt  interface{}            `json:"mqtt,omitempty" yaml:"mqtt,omitempty"`
+	Mqtt5 interface{}            `json:"mqtt5,omitempty" yaml:"mqtt5,omitempty"`
+	Nats  interface{}            `json:"nats,omitempty" yaml:"nats,omitempty"`
+	Jms   interface{}            `json:"jms,omitempty" yaml:"jms,omitempty"`
+	Sns   interface{}            `json:"sns,omitempty" yaml:"sns,omitempty"`
+	Sqs   interface{}            `json:"sqs,omitempty" yaml:"sqs,omitempty"`
+	Stomp interface{}            `json:"stomp,omitempty" yaml:"stomp,omitempty"`
+	Redis interface{}            `json:"redis,omitempty" yaml:"redis,omitempty"`
 }
 
 var _ jsonpointer.JSONPointable = (*ChannelBindings)(nil)
@@ -208,19 +208,19 @@ func (h OperationsBindings) JSONLookup(token string) (interface{}, error) {
 // OperationBindings is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#operation-bindings-object
 type OperationBindings struct {
 	openapi3.ExtensionProps
-	Http  *bindings.HttpOperation `json:"http,omitempty" yaml:"http,omitempty"`
-	Ws    *bindings.WsOperation   `json:"ws,omitempty" yaml:"ws,omitempty"`
-	Kafka interface{}             `json:"kafka,omitempty" yaml:"kafka,omitempty"`
-	Amqp  interface{}             `json:"amqp,omitempty" yaml:"amqp,omitempty"`
-	Amqp1 interface{}             `json:"amqp1,omitempty" yaml:"amqp1,omitempty"`
-	Mqtt  interface{}             `json:"mqtt,omitempty" yaml:"mqtt,omitempty"`
-	Mqtt5 interface{}             `json:"mqtt5,omitempty" yaml:"mqtt5,omitempty"`
-	Nats  interface{}             `json:"nats,omitempty" yaml:"nats,omitempty"`
-	Jms   interface{}             `json:"jms,omitempty" yaml:"jms,omitempty"`
-	Sns   interface{}             `json:"sns,omitempty" yaml:"sns,omitempty"`
-	Sqs   interface{}             `json:"sqs,omitempty" yaml:"sqs,omitempty"`
-	Stomp interface{}             `json:"stomp,omitempty" yaml:"stomp,omitempty"`
-	Redis interface{}             `json:"redis,omitempty" yaml:"redis,omitempty"`
+	Http  *bindings.HttpOperation  `json:"http,omitempty" yaml:"http,omitempty"`
+	Ws    *bindings.WsOperation    `json:"ws,omitempty" yaml:"ws,omitempty"`
+	Kafka *bindings.KafkaOperation `json:"kafka,omitempty" yaml:"kafka,omitempty"`
+	Amqp  interface{}              `json:"amqp,omitempty" yaml:"amqp,omitempty"`
+	Amqp1 interface{}              `json:"amqp1,omitempty" yaml:"amqp1,omitempty"`
+	Mqtt  interface{}              `json:"mqtt,omitempty" yaml:"mqtt,omitempty"`
+	Mqtt5 interface{}              `json:"mqtt5,omitempty" yaml:"mqtt5,omitempty"`
+	Nats  interface{}              `json:"nats,omitempty" yaml:"nats,omitempty"`
+	Jms   interface{}              `json:"jms,omitempty" yaml:"jms,omitempty"`
+	Sns   interface{}              `json:"sns,omitempty" yaml:"sns,omitempty"`
+	Sqs   interface{}              `json:"sqs,omitempty" yaml:"sqs,omitempty"`
+	Stomp interface{}              `json:"stomp,omitempty" yaml:"stomp,omitempty"`
+	Redis interface{}              `json:"redis,omitempty" yaml:"redis,omitempty"`
 }
 
 var _ jsonpointer.JSONPointable = (*OperationBindings)(nil)
@@ -299,19 +299,19 @@ func (h MessagesBindings) JSONLookup(token string) (interface{}, error) {
 // MessageBindings is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#message-bindings-object
 type MessageBindings struct {
 	openapi3.ExtensionProps
-	Http  *bindings.HttpMessage `json:"http,omitempty" yaml:"http,omitempty"`
-	Ws    *bindings.WsMessage   `json:"ws,omitempty" yaml:"ws,omitempty"`
-	Kafka interface{}           `json:"kafka,omitempty" yaml:"kafka,omitempty"`
-	Amqp  interface{}           `json:"amqp,omitempty" yaml:"amqp,omitempty"`
-	Amqp1 interface{}           `json:"amqp1,omitempty" yaml:"amqp1,omitempty"`
-	Mqtt  interface{}           `json:"mqtt,omitempty" yaml:"mqtt,omitempty"`
-	Mqtt5 interface{}           `json:"mqtt5,omitempty" yaml:"mqtt5,omitempty"`
-	Nats  interface{}           `json:"nats,omitempty" yaml:"nats,omitempty"`
-	Jms   interface{}           `json:"jms,omitempty" yaml:"jms,omitempty"`
-	Sns   interface{}           `json:"sns,omitempty" yaml:"sns,omitempty"`
-	Sqs   interface{}           `json:"sqs,omitempty" yaml:"sqs,omitempty"`
-	Stomp interface{}           `json:"stomp,omitempty" yaml:"stomp,omitempty"`
-	Redis interface{}           `json:"redis,omitempty" yaml:"redis,omitempty"`
+	Http  *bindings.HttpMessage  `json:"http,omitempty" yaml:"http,omitempty"`
+	Ws    *bindings.WsMessage    `json:"ws,omitempty" yaml:"ws,omitempty"`
+	Kafka *bindings.KafkaMessage `json:"kafka,omitempty" yaml:"kafka,omitempty"`
+	Amqp  interface{}            `json:"amqp,omitempty" yaml:"amqp,omitempty"`
+	Amqp1 interface{}            `json:"amqp1,omitempty" yaml:"amqp1,omitempty"`
+	Mqtt  interface{}            `json:"mqtt,omitempty" yaml:"mqtt,omitempty"`
+	Mqtt5 interface{}            `json:"mqtt5,omitempty" yaml:"mqtt5,omitempty"`
+	Nats  interface{}            `json:"nats,omitempty" yaml:"nats,omitempty"`
+	Jms   interface{}            `json:"jms,omitempty" yaml:"jms,omitempty"`
+	Sns   interface{}            `json:"sns,omitempty" yaml:"sns,omitempty"`
+	Sqs   interface{}            `json:"sqs,omitempty" yaml:"sqs,omitempty"`
+	Stomp interface{}            `json:"stomp,omitempty" yaml:"stomp,omitempty"`
+	Redis interface{}            `json:"redis,omitempty" yaml:"redis,omitempty"`
 }
 
 var _ jsonpointer.JSONPointable = (*MessageBindings)(nil)
