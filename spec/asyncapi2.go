@@ -7,7 +7,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 
-	"github.com/ligser/go-asyncapi2/spec/validate"
+	"github.com/rdmrcv/go-asyncapi2/spec/validate"
 )
 
 const asyncAPIVersion = "2.0.0"

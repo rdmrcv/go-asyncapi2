@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
-	"github.com/ligser/go-asyncapi2/spec/bindings"
+	"github.com/rdmrcv/go-asyncapi2/spec/bindings"
 )
 
 type ServersBindings map[string]*ServerBindings

@@ -8,7 +8,7 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 
-	"github.com/ligser/go-asyncapi2/spec/validate"
+	"github.com/rdmrcv/go-asyncapi2/spec/validate"
 )
 
 // WsServer is defined in AsyncAPI spec: https://github.com/asyncapi/bindings/tree/master/websockets#server-binding-object

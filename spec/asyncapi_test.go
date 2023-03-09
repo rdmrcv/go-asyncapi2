@@ -7,7 +7,7 @@ import (
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/ghodss/yaml"
 
-	"github.com/ligser/go-asyncapi2/spec/bindings"
+	"github.com/rdmrcv/go-asyncapi2/spec/bindings"
 )
 
 func TestT_MarshalJSON(t *testing.T) {

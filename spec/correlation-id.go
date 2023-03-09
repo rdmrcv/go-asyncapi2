@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/ligser/go-asyncapi2/spec/validate"
+	"github.com/rdmrcv/go-asyncapi2/spec/validate"
 )
 
 type CorrelationIDs map[string]*CorrelationID
