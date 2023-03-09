@@ -35,10 +35,10 @@ func (value *MessageOneOf) MarshalJSON() ([]byte, error) {
 			err     error
 		)
 
-		if len(value.Ref) != 0 {
-			entJson, err = json.Marshal(Ref{Ref: value.Ref})
+		if len(ent.Ref) != 0 {
+			entJson, err = json.Marshal(Ref{Ref: ent.Ref})
 		} else {
-			entJson, err = json.Marshal(value.Value)
+			entJson, err = json.Marshal(ent.Value)
 		}
 
 		if err != nil {
