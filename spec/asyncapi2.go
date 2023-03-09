@@ -2,10 +2,11 @@ package spec
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
-	"github.com/getkin/kin-openapi/jsoninfo"
 	"github.com/getkin/kin-openapi/openapi3"
+
 	"github.com/ligser/go-asyncapi2/spec/validate"
 )
 
@@ -14,7 +15,8 @@ const asyncAPIVersion = "2.0.0"
 // T is the root of an OpenAPI v3 document
 // T is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#A2SObject
 type T struct {
-	openapi3.ExtensionProps
+	Extensions map[string]interface{} `json:"-" yaml:"-"`
+
 	AsyncAPI           string                 `json:"asyncapi" yaml:"asyncapi"`
 	ID                 string                 `json:"id,omitempty" yaml:"id,omitempty"`
 	Info               *openapi3.Info         `json:"info" yaml:"info"`
@@ -27,11 +29,54 @@ type T struct {
 }
 
 func (doc *T) MarshalJSON() ([]byte, error) {
-	return jsoninfo.MarshalStrictStruct(doc)
+	m := make(map[string]interface{}, 4+len(doc.Extensions))
+	for k, v := range doc.Extensions {
+		m[k] = v
+	}
+	m["asyncapi"] = doc.AsyncAPI
+	if len(doc.ID) != 0 {
+		m["id"] = doc.ID
+	}
+
+	m["info"] = doc.Info
+	m["defaultContentType"] = doc.DefaultContentType
+	if x := doc.Servers; len(x) != 0 {
+		m["servers"] = x
+	}
+	if x := doc.Channels; len(x) != 0 {
+		m["channels"] = x
+	}
+	if x := doc.Components; x != nil {
+		m["components"] = x
+	}
+	if x := doc.Tags; len(x) != 0 {
+		m["tags"] = x
+	}
+	if x := doc.ExternalDocs; x != nil {
+		m["externalDocs"] = x
+	}
+
+	return json.Marshal(m)
 }
 
 func (doc *T) UnmarshalJSON(data []byte) error {
-	return jsoninfo.UnmarshalStrictStruct(data, doc)
+	type TBis T
+	var x TBis
+	if err := json.Unmarshal(data, &x); err != nil {
+		return err
+	}
+	_ = json.Unmarshal(data, &x.Extensions)
+	delete(x.Extensions, "asyncapi")
+	delete(x.Extensions, "id")
+	delete(x.Extensions, "info")
+	delete(x.Extensions, "defaultContentType")
+	delete(x.Extensions, "servers")
+	delete(x.Extensions, "channels")
+	delete(x.Extensions, "components")
+	delete(x.Extensions, "tags")
+	delete(x.Extensions, "externalDocs")
+	*doc = T(x)
+	return nil
 }
 
 func (doc *T) Validate(ctx context.Context) error {

@@ -2,11 +2,12 @@ package bindings
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
-	"github.com/getkin/kin-openapi/jsoninfo"
 	"github.com/getkin/kin-openapi/openapi3"
+
 	"github.com/ligser/go-asyncapi2/spec/validate"
 )
 
@@ -45,11 +46,10 @@ var httpValidMethodsSet = map[string]struct{}{
 	http.MethodTrace:   {},
 }
 
-var _ jsoninfo.StrictStruct = &HttpOperation{}
-
 // HttpOperation is defined in AsyncAPI spec: https://github.com/asyncapi/bindings/tree/master/http#operation-binding-object
 type HttpOperation struct {
-	openapi3.ExtensionProps
+	Extensions map[string]interface{} `json:"-" yaml:"-"`
+
 	Type           HttpOperationBindingType `json:"type,omitempty" yaml:"type,omitempty"`
 	Method         string                   `json:"method,omitempty" yaml:"method,omitempty"`
 	Query          *openapi3.Schema         `json:"query,omitempty" yaml:"query,omitempty"`
@@ -57,11 +57,43 @@ type HttpOperation struct {
 }
 
 func (binding *HttpOperation) MarshalJSON() ([]byte, error) {
-	return jsoninfo.MarshalStrictStruct(binding)
+	m := make(map[string]interface{}, 4+len(binding.Extensions))
+	for k, v := range binding.Extensions {
+		m[k] = v
+	}
+
+	if len(binding.Type) != 0 {
+		m["type"] = binding.Type
+	}
+	if len(binding.Method) != 0 {
+		m["method"] = binding.Method
+	}
+	if binding.Query != nil {
+		m["query"] = binding.Query
+	}
+	if len(binding.BindingVersion) != 0 {
+		m["bindingVersion"] = binding.BindingVersion
+	}
+
+	return json.Marshal(m)
 }
 
 func (binding *HttpOperation) UnmarshalJSON(data []byte) error {
-	return jsoninfo.UnmarshalStrictStruct(data, binding)
+	type HttpOperationBis HttpOperation
+	var x HttpOperationBis
+	if err := json.Unmarshal(data, &x); err != nil {
+		return err
+	}
+	_ = json.Unmarshal(data, &x.Extensions)
+
+	delete(x.Extensions, "type")
+	delete(x.Extensions, "method")
+	delete(x.Extensions, "query")
+	delete(x.Extensions, "bindingVersion")
+
+	*binding = HttpOperation(x)
+
+	return nil
 }
 
 func (binding *HttpOperation) Validate(ctx context.Context) error {
@@ -97,21 +129,44 @@ func (binding *HttpOperation) Validate(ctx context.Context) error {
 	return nil
 }
 
-var _ jsoninfo.StrictStruct = &HttpMessage{}
-
 // HttpMessage is defined in AsyncAPI spec: https://github.com/asyncapi/bindings/tree/master/http#message-binding-object
 type HttpMessage struct {
-	openapi3.ExtensionProps
+	Extensions map[string]interface{} `json:"-" yaml:"-"`
+
 	Headers        *openapi3.Schema `json:"headers,omitempty" yaml:"headers,omitempty"`
 	BindingVersion string           `json:"bindingVersion,omitempty" yaml:"bindingVersion,omitempty"`
 }
 
 func (value *HttpMessage) MarshalJSON() ([]byte, error) {
-	return jsoninfo.MarshalStrictStruct(value)
+	m := make(map[string]interface{}, 2+len(value.Extensions))
+	for k, v := range value.Extensions {
+		m[k] = v
+	}
+
+	if value.Headers != nil {
+		m["headers"] = value.Headers
+	}
+	if len(value.BindingVersion) != 0 {
+		m["bindingVersion"] = value.BindingVersion
+	}
+
+	return json.Marshal(m)
 }
 
 func (value *HttpMessage) UnmarshalJSON(data []byte) error {
-	return jsoninfo.UnmarshalStrictStruct(data, value)
+	type HttpMessageBis HttpMessage
+	var x HttpMessageBis
+	if err := json.Unmarshal(data, &x); err != nil {
+		return err
+	}
+	_ = json.Unmarshal(data, &x.Extensions)
+
+	delete(x.Extensions, "headers")
+	delete(x.Extensions, "bindingVersion")
+
+	*value = HttpMessage(x)
+
+	return nil
 }
 
 func (value *HttpMessage) Validate(ctx context.Context) error {

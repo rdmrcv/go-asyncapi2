@@ -3,73 +3,21 @@ package spec
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
-	"github.com/getkin/kin-openapi/jsoninfo"
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/go-openapi/jsonpointer"
 )
 
 type Messages map[string]*Message
 
-var _ jsonpointer.JSONPointable = (*Messages)(nil)
-
-func (h Messages) JSONLookup(token string) (interface{}, error) {
-	value, ok := h[token]
-	if value == nil || !ok {
-		return nil, fmt.Errorf("object has no field %q", token)
-	}
-
-	return value, nil
-}
-
 type MessagesTraits map[string]*MessageTrait
-
-var _ jsonpointer.JSONPointable = (*MessagesTraits)(nil)
-
-func (h MessagesTraits) JSONLookup(token string) (interface{}, error) {
-	value, ok := h[token]
-	if value == nil || !ok {
-		return nil, fmt.Errorf("object has no field %q", token)
-	}
-
-	return value, nil
-}
-
-// SchemaFormat tries to guess if a scheme serialized in the schemaFormat field
-// or its just schema name.
-type SchemaFormat struct {
-	SchemaFormat string
-	Schema       *openapi3.Schema
-}
-
-func (m *SchemaFormat) MarshalJSON() ([]byte, error) {
-	if m.Schema != nil {
-		return jsoninfo.MarshalStrictStruct(m.Schema)
-	}
-
-	return json.Marshal(m.SchemaFormat)
-}
-
-func (m *SchemaFormat) UnmarshalJSON(data []byte) error {
-	schema := openapi3.Schema{}
-
-	err := jsoninfo.UnmarshalStrictStruct(data, &schema)
-
-	if !schema.IsEmpty() {
-		m.Schema = &schema
-		return err
-	}
-
-	return json.Unmarshal(data, &m.SchemaFormat)
-}
 
 // MessageTrait is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#message-trait-object
 type MessageTrait struct {
-	openapi3.ExtensionProps
+	Extensions map[string]interface{} `json:"-" yaml:"-"`
+
 	Headers       *openapi3.SchemaRef      `json:"headers,omitempty" yaml:"headers,omitempty"`
 	CorrelationID *CorrelationIDRef        `json:"correlationId,omitempty" yaml:"correlationId,omitempty"`
-	SchemaFormat  *SchemaFormat            `json:"schemaFormat,omitempty" yaml:"schemaFormat,omitempty"`
+	SchemaFormat  string                   `json:"schemaFormat,omitempty" yaml:"schemaFormat,omitempty"`
 	ContentType   string                   `json:"contentType,omitempty" yaml:"contentType,omitempty"`
 	Name          string                   `json:"name,omitempty" yaml:"name,omitempty"`
 	Title         string                   `json:"title,omitempty" yaml:"title,omitempty"`
@@ -82,11 +30,78 @@ type MessageTrait struct {
 }
 
 func (value *MessageTrait) MarshalJSON() ([]byte, error) {
-	return jsoninfo.MarshalStrictStruct(value)
+	return json.Marshal(value.produceM())
+}
+
+func (value *MessageTrait) produceM() map[string]interface{} {
+	m := make(map[string]interface{}, 12+len(value.Extensions))
+	for k, v := range value.Extensions {
+		m[k] = v
+	}
+
+	if value.Headers != nil {
+		m["headers"] = value.Headers
+	}
+	if value.CorrelationID != nil {
+		m["correlationId"] = value.CorrelationID
+	}
+	if len(value.SchemaFormat) != 0 {
+		m["schemaFormat"] = value.SchemaFormat
+	}
+	if len(value.ContentType) != 0 {
+		m["contentType"] = value.ContentType
+	}
+	if len(value.Name) != 0 {
+		m["name"] = value.Name
+	}
+	if len(value.Title) != 0 {
+		m["title"] = value.Title
+	}
+	if len(value.Summary) != 0 {
+		m["summary"] = value.Summary
+	}
+	if len(value.Description) != 0 {
+		m["description"] = value.Description
+	}
+	if len(value.Tags) != 0 {
+		m["tags"] = value.Tags
+	}
+	if value.ExternalDocs != nil {
+		m["externalDocs"] = value.ExternalDocs
+	}
+	if value.Bindings != nil {
+		m["bindings"] = value.Bindings
+	}
+	if len(value.Examples) != 0 {
+		m["examples"] = value.Examples
+	}
+	return m
 }
 
 func (value *MessageTrait) UnmarshalJSON(data []byte) error {
-	return jsoninfo.UnmarshalStrictStruct(data, value)
+	type MessageTraitBis MessageTrait
+	var x MessageTraitBis
+	if err := json.Unmarshal(data, &x); err != nil {
+		return err
+	}
+	_ = json.Unmarshal(data, &x.Extensions)
+
+	delete(x.Extensions, "headers")
+	delete(x.Extensions, "correlationId")
+	delete(x.Extensions, "schemaFormat")
+	delete(x.Extensions, "contentType")
+	delete(x.Extensions, "name")
+	delete(x.Extensions, "title")
+	delete(x.Extensions, "summary")
+	delete(x.Extensions, "description")
+	delete(x.Extensions, "tags")
+	delete(x.Extensions, "externalDocs")
+	delete(x.Extensions, "bindings")
+	delete(x.Extensions, "examples")
+
+	*value = MessageTrait(x)
+
+	return nil
 }
 
 func (value *MessageTrait) Validate(ctx context.Context) error {
@@ -120,15 +135,42 @@ type Message struct {
 }
 
 func (value *Message) MarshalJSON() ([]byte, error) {
-	return jsoninfo.MarshalStrictStruct(value)
+	m := value.MessageTrait.produceM()
+
+	if value.Payload != nil {
+		m["payload"] = value.Payload
+	}
+	if len(value.Traits) != 0 {
+		m["traits"] = value.Traits
+	}
+
+	return json.Marshal(m)
 }
 
 func (value *Message) UnmarshalJSON(data []byte) error {
-	return jsoninfo.UnmarshalStrictStruct(data, value)
+	type MessageBis Message
+	var x MessageBis
+	if err := json.Unmarshal(data, &x); err != nil {
+		return err
+	}
+
+	if err := x.MessageTrait.UnmarshalJSON(data); err != nil {
+		return err
+	}
+
+	*value = Message(x)
+
+	return nil
 }
 
 func (value *Message) Validate(ctx context.Context) error {
 	if v := value.Payload; v != nil {
+		if err := v.Validate(ctx); err != nil {
+			return err
+		}
+	}
+
+	for _, v := range value.Traits {
 		if err := v.Validate(ctx); err != nil {
 			return err
 		}

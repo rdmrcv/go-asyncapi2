@@ -2,16 +2,16 @@ package spec
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"regexp"
 
-	"github.com/getkin/kin-openapi/jsoninfo"
 	"github.com/getkin/kin-openapi/openapi3"
 )
 
-// Components is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#componentsObject
+// Components scheme is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#componentsObject
 type Components struct {
-	openapi3.ExtensionProps
+	Extensions map[string]interface{} `json:"-" yaml:"-"`
 
 	Schemas           openapi3.Schemas   `json:"schemas,omitempty" yaml:"schemas,omitempty"`
 	Messages          Messages           `json:"messages,omitempty" yaml:"messages,omitempty"`
@@ -27,11 +27,71 @@ type Components struct {
 }
 
 func (components *Components) MarshalJSON() ([]byte, error) {
-	return jsoninfo.MarshalStrictStruct(components)
+	m := make(map[string]interface{}, 11+len(components.Extensions))
+	for k, v := range components.Extensions {
+		m[k] = v
+	}
+
+	if len(components.Schemas) != 0 {
+		m["schemas"] = components.Schemas
+	}
+	if len(components.Messages) != 0 {
+		m["messages"] = components.Messages
+	}
+	if len(components.SecuritySchemes) != 0 {
+		m["securitySchemes"] = components.SecuritySchemes
+	}
+	if len(components.Parameters) != 0 {
+		m["parameters"] = components.Parameters
+	}
+	if len(components.CorrelationIds) != 0 {
+		m["correlationIds"] = components.CorrelationIds
+	}
+	if len(components.OperationTraits) != 0 {
+		m["operationTraits"] = components.OperationTraits
+	}
+	if len(components.MessageTraits) != 0 {
+		m["messageTraits"] = components.MessageTraits
+	}
+	if len(components.ServerBindings) != 0 {
+		m["serverBindings"] = components.ServerBindings
+	}
+	if len(components.ChannelBindings) != 0 {
+		m["channelBindings"] = components.ChannelBindings
+	}
+	if len(components.OperationBindings) != 0 {
+		m["operationBindings"] = components.OperationBindings
+	}
+	if len(components.MessageBindings) != 0 {
+		m["messageBindings"] = components.MessageBindings
+	}
+
+	return json.Marshal(m)
 }
 
 func (components *Components) UnmarshalJSON(data []byte) error {
-	return jsoninfo.UnmarshalStrictStruct(data, components)
+	type ComponentsBis Components
+	var x ComponentsBis
+	if err := json.Unmarshal(data, &x); err != nil {
+		return err
+	}
+	_ = json.Unmarshal(data, &x.Extensions)
+
+	delete(x.Extensions, "schemas")
+	delete(x.Extensions, "messages")
+	delete(x.Extensions, "securitySchemes")
+	delete(x.Extensions, "parameters")
+	delete(x.Extensions, "correlationIds")
+	delete(x.Extensions, "operationTraits")
+	delete(x.Extensions, "messageTraits")
+	delete(x.Extensions, "serverBindings")
+	delete(x.Extensions, "channelBindings")
+	delete(x.Extensions, "operationBindings")
+	delete(x.Extensions, "messageBindings")
+
+	*components = Components(x)
+
+	return nil
 }
 
 func (components *Components) Validate(ctx context.Context) (err error) {

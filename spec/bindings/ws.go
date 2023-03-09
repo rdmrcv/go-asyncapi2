@@ -2,11 +2,12 @@ package bindings
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 
-	"github.com/getkin/kin-openapi/jsoninfo"
 	"github.com/getkin/kin-openapi/openapi3"
+
 	"github.com/ligser/go-asyncapi2/spec/validate"
 )
 
@@ -18,11 +19,10 @@ func (*WsServer) Validate(_ context.Context) error {
 	return nil
 }
 
-var _ jsoninfo.StrictStruct = &WsChannel{}
-
 // WsChannel is defined in AsyncAPI spec: https://github.com/asyncapi/bindings/tree/master/websockets#channel-binding-object
 type WsChannel struct {
-	openapi3.ExtensionProps
+	Extensions map[string]interface{} `json:"-" yaml:"-"`
+
 	Method         string           `json:"method,omitempty" yaml:"method,omitempty"`
 	Query          *openapi3.Schema `json:"query,omitempty" yaml:"query,omitempty"`
 	Headers        *openapi3.Schema `json:"headers,omitempty" yaml:"headers,omitempty"`
@@ -30,11 +30,43 @@ type WsChannel struct {
 }
 
 func (binding *WsChannel) MarshalJSON() ([]byte, error) {
-	return jsoninfo.MarshalStrictStruct(binding)
+	m := make(map[string]interface{}, 4+len(binding.Extensions))
+	for k, v := range binding.Extensions {
+		m[k] = v
+	}
+
+	if len(binding.Method) != 0 {
+		m["method"] = binding.Method
+	}
+	if binding.Query != nil {
+		m["query"] = binding.Query
+	}
+	if binding.Headers != nil {
+		m["type"] = binding.Headers
+	}
+	if len(binding.BindingVersion) != 0 {
+		m["bindingVersion"] = binding.BindingVersion
+	}
+
+	return json.Marshal(m)
 }
 
 func (binding *WsChannel) UnmarshalJSON(data []byte) error {
-	return jsoninfo.UnmarshalStrictStruct(data, binding)
+	type WsChannelBis WsChannel
+	var x WsChannelBis
+	if err := json.Unmarshal(data, &x); err != nil {
+		return err
+	}
+	_ = json.Unmarshal(data, &x.Extensions)
+
+	delete(x.Extensions, "method")
+	delete(x.Extensions, "query")
+	delete(x.Extensions, "type")
+	delete(x.Extensions, "bindingVersion")
+
+	*binding = WsChannel(x)
+
+	return nil
 }
 
 func (binding *WsChannel) Validate(ctx context.Context) error {

@@ -2,30 +2,15 @@ package spec
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 
-	"github.com/getkin/kin-openapi/jsoninfo"
 	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/go-openapi/jsonpointer"
 )
 
 type Parameters map[string]*Parameter
 
-var _ jsonpointer.JSONPointable = (*Parameters)(nil)
-
-func (h Parameters) JSONLookup(token string) (interface{}, error) {
-	value, ok := h[token]
-	if value == nil || !ok {
-		return nil, fmt.Errorf("object has no field %q", token)
-	}
-
-	return value, nil
-}
-
 // ParametersRefs is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#parameters-object
 type ParametersRefs map[string]*ParameterRef
-
-var _ jsonpointer.JSONPointable = (*ParametersRefs)(nil)
 
 func (h ParametersRefs) Validate(ctx context.Context) error {
 	for _, item := range h {
@@ -37,29 +22,49 @@ func (h ParametersRefs) Validate(ctx context.Context) error {
 	return nil
 }
 
-func (h ParametersRefs) JSONLookup(token string) (interface{}, error) {
-	value, ok := h[token]
-	if value == nil || !ok {
-		return nil, fmt.Errorf("object has no field %q", token)
-	}
-
-	return value, nil
-}
-
 // Parameter is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#parameterObject
 type Parameter struct {
-	openapi3.ExtensionProps
+	Extensions map[string]interface{} `json:"-" yaml:"-"`
+
 	Description string           `json:"description,omitempty" yaml:"description,omitempty"`
 	Schema      *openapi3.Schema `json:"schema,omitempty" yaml:"schema,omitempty"`
 	Location    string           `json:"location,omitempty" yaml:"location,omitempty"`
 }
 
 func (value *Parameter) MarshalJSON() ([]byte, error) {
-	return jsoninfo.MarshalStrictStruct(value)
+	m := make(map[string]interface{}, 6+len(value.Extensions))
+	for k, v := range value.Extensions {
+		m[k] = v
+	}
+
+	if len(value.Description) != 0 {
+		m["description"] = value.Description
+	}
+	if value.Schema != nil {
+		m["schema"] = value.Schema
+	}
+	if len(value.Location) != 0 {
+		m["location"] = value.Location
+	}
+
+	return json.Marshal(m)
 }
 
 func (value *Parameter) UnmarshalJSON(data []byte) error {
-	return jsoninfo.UnmarshalStrictStruct(data, value)
+	type ParameterBis Parameter
+	var x ParameterBis
+	if err := json.Unmarshal(data, &x); err != nil {
+		return err
+	}
+	_ = json.Unmarshal(data, &x.Extensions)
+
+	delete(x.Extensions, "description")
+	delete(x.Extensions, "schema")
+	delete(x.Extensions, "location")
+
+	*value = Parameter(x)
+
+	return nil
 }
 
 func (value *Parameter) Validate(ctx context.Context) error {

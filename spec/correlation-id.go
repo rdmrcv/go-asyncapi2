@@ -2,40 +2,51 @@ package spec
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
-	"github.com/getkin/kin-openapi/jsoninfo"
-	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/go-openapi/jsonpointer"
 	"github.com/ligser/go-asyncapi2/spec/validate"
 )
 
 type CorrelationIDs map[string]*CorrelationID
 
-var _ jsonpointer.JSONPointable = (*CorrelationIDs)(nil)
-
-func (h CorrelationIDs) JSONLookup(token string) (interface{}, error) {
-	value, ok := h[token]
-	if value == nil || !ok {
-		return nil, fmt.Errorf("object has no field %q", token)
-	}
-
-	return value, nil
-}
-
 // CorrelationID is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#correlationIdObject
 type CorrelationID struct {
-	openapi3.ExtensionProps
+	Extensions map[string]interface{} `json:"-" yaml:"-"`
+
 	Description string `json:"description,omitempty" yaml:"description,omitempty"`
 	Location    string `json:"location" yaml:"location"`
 }
 
 func (value *CorrelationID) MarshalJSON() ([]byte, error) {
-	return jsoninfo.MarshalStrictStruct(value)
+	m := make(map[string]interface{}, 2+len(value.Extensions))
+	for k, v := range value.Extensions {
+		m[k] = v
+	}
+
+	if len(value.Description) != 0 {
+		m["description"] = value.Description
+	}
+
+	m["location"] = value.Location
+
+	return json.Marshal(m)
 }
 
 func (value *CorrelationID) UnmarshalJSON(data []byte) error {
-	return jsoninfo.UnmarshalStrictStruct(data, value)
+	type CorrelationIDBis CorrelationID
+	var x CorrelationIDBis
+	if err := json.Unmarshal(data, &x); err != nil {
+		return err
+	}
+	_ = json.Unmarshal(data, &x.Extensions)
+
+	delete(x.Extensions, "description")
+	delete(x.Extensions, "location")
+
+	*value = CorrelationID(x)
+
+	return nil
 }
 
 func (value *CorrelationID) Validate(context.Context) error {

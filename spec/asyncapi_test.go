@@ -6,6 +6,8 @@ import (
 
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/ghodss/yaml"
+
+	"github.com/ligser/go-asyncapi2/spec/bindings"
 )
 
 func TestT_MarshalJSON(t *testing.T) {
@@ -309,8 +311,8 @@ func TestT_MarshalJSON(t *testing.T) {
 			OperationTraits: map[string]*OperationTrait{
 				"kafka": {
 					Bindings: &OperationBindings{
-						Kafka: map[string]string{
-							"clientId": "my-app-id",
+						Kafka: &bindings.KafkaOperation{
+							ClientID: &openapi3.Schema{Type: "string"},
 						},
 					},
 				},

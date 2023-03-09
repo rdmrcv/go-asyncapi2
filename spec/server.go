@@ -2,15 +2,13 @@ package spec
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"math"
 	"net/url"
 	"regexp"
 	"strings"
-
-	"github.com/getkin/kin-openapi/jsoninfo"
-	"github.com/getkin/kin-openapi/openapi3"
 )
 
 var (
@@ -19,7 +17,7 @@ var (
 	ErrServerKeyInvalid = fmt.Errorf("server should match pattern %q", serverKeyRegexp.String())
 )
 
-// Servers is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#serversObject
+// Servers object is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#serversObject
 type Servers map[string]*Server
 
 func (servers Servers) Validate(ctx context.Context) error {
@@ -40,12 +38,14 @@ func (servers Servers) MatchURL(parsedURL *url.URL) (*Server, []string, string) 
 	if i := strings.IndexByte(rawURL, '?'); i >= 0 {
 		rawURL = rawURL[:i]
 	}
+
 	for _, server := range servers {
 		pathParams, remaining, ok := server.MatchRawURL(rawURL)
 		if ok {
 			return server, pathParams, remaining
 		}
 	}
+
 	return nil, nil, ""
 }
 
@@ -54,7 +54,8 @@ type SecurityRequirements map[string][]string
 
 // Server is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#serverObject
 type Server struct {
-	openapi3.ExtensionProps
+	Extensions map[string]interface{} `json:"-" yaml:"-"`
+
 	URL             string                     `json:"url" yaml:"url"`
 	Protocol        string                     `json:"protocol" yaml:"protocol"`
 	ProtocolVersion string                     `json:"protocolVersion,omitempty" yaml:"protocolVersion,omitempty"`
@@ -65,14 +66,54 @@ type Server struct {
 }
 
 func (value *Server) MarshalJSON() ([]byte, error) {
-	return jsoninfo.MarshalStrictStruct(value)
+	m := make(map[string]interface{}, 7+len(value.Extensions))
+	for k, v := range value.Extensions {
+		m[k] = v
+	}
+
+	m["url"] = value.URL
+	m["protocol"] = value.Protocol
+	if len(value.ProtocolVersion) != 0 {
+		m["protocolVersion"] = value.ProtocolVersion
+	}
+	if len(value.Description) != 0 {
+		m["description"] = value.Description
+	}
+	if len(value.Security) != 0 {
+		m["security"] = value.Security
+	}
+	if value.Bindings != nil {
+		m["bindings"] = value.Bindings
+	}
+	if len(value.Variables) != 0 {
+		m["variables"] = value.Variables
+	}
+
+	return json.Marshal(m)
 }
 
 func (value *Server) UnmarshalJSON(data []byte) error {
-	return jsoninfo.UnmarshalStrictStruct(data, value)
+	type ServerBis Server
+	var x ServerBis
+	if err := json.Unmarshal(data, &x); err != nil {
+		return err
+	}
+	_ = json.Unmarshal(data, &x.Extensions)
+
+	delete(x.Extensions, "url")
+	delete(x.Extensions, "protocol")
+	delete(x.Extensions, "protocolVersion")
+	delete(x.Extensions, "description")
+	delete(x.Extensions, "security")
+	delete(x.Extensions, "bindings")
+	delete(x.Extensions, "variables")
+
+	*value = Server(x)
+
+	return nil
 }
 
-func (value Server) ParameterNames() ([]string, error) {
+func (value *Server) ParameterNames() ([]string, error) {
 	pattern := value.URL
 	var params []string
 	for len(pattern) > 0 {
@@ -91,7 +132,7 @@ func (value Server) ParameterNames() ([]string, error) {
 	return params, nil
 }
 
-func (value Server) MatchRawURL(input string) ([]string, string, bool) {
+func (value *Server) MatchRawURL(input string) ([]string, string, bool) {
 	pattern := value.URL
 	var params []string
 	for len(pattern) > 0 {
@@ -178,18 +219,47 @@ func (value *Server) Validate(ctx context.Context) (err error) {
 
 // ServerVariable is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#serverVariableObject
 type ServerVariable struct {
-	openapi3.ExtensionProps
+	Extensions map[string]interface{} `json:"-" yaml:"-"`
+
 	Enum        []string `json:"enum,omitempty" yaml:"enum,omitempty"`
 	Default     string   `json:"default,omitempty" yaml:"default,omitempty"`
 	Description string   `json:"description,omitempty" yaml:"description,omitempty"`
 }
 
 func (value *ServerVariable) MarshalJSON() ([]byte, error) {
-	return jsoninfo.MarshalStrictStruct(value)
+	m := make(map[string]interface{}, 3+len(value.Extensions))
+	for k, v := range value.Extensions {
+		m[k] = v
+	}
+
+	if len(value.Enum) != 0 {
+		m["enum"] = value.Enum
+	}
+	if len(value.Default) != 0 {
+		m["default"] = value.Default
+	}
+	if len(value.Description) != 0 {
+		m["description"] = value.Description
+	}
+
+	return json.Marshal(m)
 }
 
 func (value *ServerVariable) UnmarshalJSON(data []byte) error {
-	return jsoninfo.UnmarshalStrictStruct(data, value)
+	type ServerVariableBis ServerVariable
+	var x ServerVariableBis
+	if err := json.Unmarshal(data, &x); err != nil {
+		return err
+	}
+	_ = json.Unmarshal(data, &x.Extensions)
+
+	delete(x.Extensions, "enum")
+	delete(x.Extensions, "default")
+	delete(x.Extensions, "description")
+
+	*value = ServerVariable(x)
+
+	return nil
 }
 
 func (value *ServerVariable) Validate(context.Context) error {

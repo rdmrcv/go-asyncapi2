@@ -1,4 +1,4 @@
-// Package asyncapi2 parses and writes AsyncAPIv2 specification documents.
+// Package spec parses and writes AsyncAPIv2 specification documents.
 //
 // Does not cover all elements of AsyncAPIv2.
 //

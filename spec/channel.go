@@ -2,26 +2,11 @@ package spec
 
 import (
 	"context"
-	"fmt"
-
-	"github.com/getkin/kin-openapi/jsoninfo"
-	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/go-openapi/jsonpointer"
+	"encoding/json"
 )
 
 // Channels is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#channels-object
 type Channels map[string]*Channel
-
-func (h Channels) JSONLookup(token string) (interface{}, error) {
-	value, ok := h[token]
-	if value == nil || !ok {
-		return nil, fmt.Errorf("object has no field %q", token)
-	}
-
-	return value, nil
-}
-
-var _ jsonpointer.JSONPointable = (Channels)(nil)
 
 func (h Channels) Validate(ctx context.Context) error {
 	for _, item := range h {
@@ -35,7 +20,8 @@ func (h Channels) Validate(ctx context.Context) error {
 
 // Channel is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#channel-item-object
 type Channel struct {
-	openapi3.ExtensionProps
+	Extensions map[string]interface{} `json:"-" yaml:"-"`
+
 	Description string              `json:"description,omitempty" yaml:"description,omitempty"`
 	Subscribe   *OperationRef       `json:"subscribe,omitempty" yaml:"subscribe,omitempty"`
 	Publish     *OperationRef       `json:"publish,omitempty" yaml:"publish,omitempty"`
@@ -44,11 +30,45 @@ type Channel struct {
 }
 
 func (value *Channel) MarshalJSON() ([]byte, error) {
-	return jsoninfo.MarshalStrictStruct(value)
+	m := make(map[string]interface{}, 5+len(value.Extensions))
+	for k, v := range value.Extensions {
+		m[k] = v
+	}
+
+	m["description"] = value.Description
+	if value.Subscribe != nil {
+		m["subscribe"] = value.Subscribe
+	}
+	if value.Publish != nil {
+		m["publish"] = value.Publish
+	}
+	if len(value.Parameters) > 0 {
+		m["parameters"] = value.Parameters
+	}
+	if value.Bindings != nil {
+		m["bindings"] = value.Bindings
+	}
+
+	return json.Marshal(m)
 }
 
 func (value *Channel) UnmarshalJSON(data []byte) error {
-	return jsoninfo.UnmarshalStrictStruct(data, value)
+	type ChannelBis Channel
+	var x ChannelBis
+	if err := json.Unmarshal(data, &x); err != nil {
+		return err
+	}
+	_ = json.Unmarshal(data, &x.Extensions)
+
+	delete(x.Extensions, "description")
+	delete(x.Extensions, "subscribe")
+	delete(x.Extensions, "publish")
+	delete(x.Extensions, "parameters")
+	delete(x.Extensions, "bindings")
+
+	*value = Channel(x)
+
+	return nil
 }
 
 func (value *Channel) Validate(ctx context.Context) error {

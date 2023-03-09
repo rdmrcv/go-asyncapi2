@@ -3,9 +3,6 @@ package spec
 import (
 	"context"
 	"encoding/json"
-
-	"github.com/getkin/kin-openapi/jsoninfo"
-	"github.com/go-openapi/jsonpointer"
 )
 
 type oneOfField struct {
@@ -14,14 +11,17 @@ type oneOfField struct {
 
 type MessageOneOf struct {
 	MessageRef
+
 	OneOf []*MessageRef
 }
 
-var _ jsonpointer.JSONPointable = (*MessageOneOf)(nil)
-
 func (value *MessageOneOf) MarshalJSON() ([]byte, error) {
 	if len(value.OneOf) == 0 {
-		return jsoninfo.MarshalRef(value.Ref, value.Value)
+		if len(value.Ref) != 0 {
+			return json.Marshal(Ref{Ref: value.Ref})
+		}
+
+		return json.Marshal(value.Value)
 	}
 
 	ents := make([]json.RawMessage, 0, len(value.OneOf))
@@ -30,7 +30,17 @@ func (value *MessageOneOf) MarshalJSON() ([]byte, error) {
 			continue
 		}
 
-		entJson, err := jsoninfo.MarshalRef(ent.Ref, ent.Value)
+		var (
+			entJson []byte
+			err     error
+		)
+
+		if len(value.Ref) != 0 {
+			entJson, err = json.Marshal(Ref{Ref: value.Ref})
+		} else {
+			entJson, err = json.Marshal(value.Value)
+		}
+
 		if err != nil {
 			return nil, err
 		}
@@ -48,7 +58,18 @@ func (value *MessageOneOf) UnmarshalJSON(data []byte) error {
 	}
 
 	if len(oneof.OneOf) == 0 {
-		return jsoninfo.UnmarshalRef(data, &value.Ref, &value.Value)
+		var ref Ref
+		if err := json.Unmarshal(data, &ref); err != nil {
+			return err
+		}
+
+		if len(ref.Ref) != 0 {
+			value.Ref = ref.Ref
+
+			return nil
+		}
+
+		return json.Unmarshal(data, value.Value)
 	}
 
 	ents := make([]*MessageRef, 0, len(oneof.OneOf))
@@ -57,12 +78,19 @@ func (value *MessageOneOf) UnmarshalJSON(data []byte) error {
 			Value: &Message{},
 		}
 
-		if err := jsoninfo.UnmarshalRef(ent, &entModel.Ref, entModel.Value); err != nil {
+		var ref Ref
+		if err := json.Unmarshal(ent, &ref); err != nil {
 			return err
 		}
 
-		if len(entModel.Ref) != 0 {
-			entModel.Value = nil
+		if len(ref.Ref) != 0 {
+			entModel.Ref = ref.Ref
+
+			continue
+		}
+
+		if err := json.Unmarshal(ent, value.Value); err != nil {
+			return err
 		}
 
 		ents = append(ents, &entModel)
@@ -85,17 +113,4 @@ func (value *MessageOneOf) Validate(ctx context.Context) error {
 	}
 
 	return foundUnresolvedRef(value.Ref)
-}
-
-func (value MessageOneOf) JSONLookup(token string) (interface{}, error) {
-	if token == "$ref" {
-		return value.Ref, nil
-	}
-
-	if token == "oneOf" {
-		return value.OneOf, nil
-	}
-
-	ptr, _, err := jsonpointer.GetForToken(value.Value, token)
-	return ptr, err
 }

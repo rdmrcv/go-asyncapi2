@@ -2,53 +2,107 @@ package spec
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
 
-	"github.com/getkin/kin-openapi/jsoninfo"
-	"github.com/getkin/kin-openapi/openapi3"
-	"github.com/go-openapi/jsonpointer"
 	"github.com/ligser/go-asyncapi2/spec/bindings"
 )
 
 type ServersBindings map[string]*ServerBindings
 
-var _ jsonpointer.JSONPointable = (*ServersBindings)(nil)
-
-func (h ServersBindings) JSONLookup(token string) (interface{}, error) {
-	value, ok := h[token]
-	if value == nil || !ok {
-		return nil, fmt.Errorf("object has no field %q", token)
-	}
-
-	return value, nil
-}
-
 // ServerBindings is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#server-bindings-object
 type ServerBindings struct {
-	openapi3.ExtensionProps
+	Extensions map[string]interface{} `json:"-" yaml:"-"`
+
 	Http  *bindings.HttpServer  `json:"http,omitempty" yaml:"http,omitempty"`
 	Ws    *bindings.WsServer    `json:"ws,omitempty" yaml:"ws,omitempty"`
 	Kafka *bindings.KafkaServer `json:"kafka,omitempty" yaml:"kafka,omitempty"`
-	Amqp  interface{}           `json:"amqp,omitempty" yaml:"amqp,omitempty"`
-	Amqp1 interface{}           `json:"amqp1,omitempty" yaml:"amqp1,omitempty"`
-	Mqtt  interface{}           `json:"mqtt,omitempty" yaml:"mqtt,omitempty"`
-	Mqtt5 interface{}           `json:"mqtt5,omitempty" yaml:"mqtt5,omitempty"`
-	Nats  interface{}           `json:"nats,omitempty" yaml:"nats,omitempty"`
-	Jms   interface{}           `json:"jms,omitempty" yaml:"jms,omitempty"`
-	Sns   interface{}           `json:"sns,omitempty" yaml:"sns,omitempty"`
-	Sqs   interface{}           `json:"sqs,omitempty" yaml:"sqs,omitempty"`
-	Stomp interface{}           `json:"stomp,omitempty" yaml:"stomp,omitempty"`
-	Redis interface{}           `json:"redis,omitempty" yaml:"redis,omitempty"`
+
+	Amqp  interface{} `json:"amqp,omitempty" yaml:"amqp,omitempty"`
+	Amqp1 interface{} `json:"amqp1,omitempty" yaml:"amqp1,omitempty"`
+	Mqtt  interface{} `json:"mqtt,omitempty" yaml:"mqtt,omitempty"`
+	Mqtt5 interface{} `json:"mqtt5,omitempty" yaml:"mqtt5,omitempty"`
+	Nats  interface{} `json:"nats,omitempty" yaml:"nats,omitempty"`
+	Jms   interface{} `json:"jms,omitempty" yaml:"jms,omitempty"`
+	Sns   interface{} `json:"sns,omitempty" yaml:"sns,omitempty"`
+	Sqs   interface{} `json:"sqs,omitempty" yaml:"sqs,omitempty"`
+	Stomp interface{} `json:"stomp,omitempty" yaml:"stomp,omitempty"`
+	Redis interface{} `json:"redis,omitempty" yaml:"redis,omitempty"`
 }
 
-var _ jsonpointer.JSONPointable = (*ServerBindings)(nil)
-
 func (value *ServerBindings) MarshalJSON() ([]byte, error) {
-	return jsoninfo.MarshalStrictStruct(value)
+	m := make(map[string]interface{}, 13+len(value.Extensions))
+	for k, v := range value.Extensions {
+		m[k] = v
+	}
+
+	if value.Http != nil {
+		m["http"] = value.Http
+	}
+	if value.Ws != nil {
+		m["ws"] = value.Ws
+	}
+	if value.Kafka != nil {
+		m["kafka"] = value.Kafka
+	}
+	if value.Amqp != nil {
+		m["amqp"] = value.Amqp
+	}
+	if value.Amqp1 != nil {
+		m["amqp1"] = value.Amqp1
+	}
+	if value.Mqtt != nil {
+		m["mqtt"] = value.Mqtt
+	}
+	if value.Mqtt5 != nil {
+		m["mqtt5"] = value.Mqtt5
+	}
+	if value.Nats != nil {
+		m["nats"] = value.Nats
+	}
+	if value.Jms != nil {
+		m["jms"] = value.Jms
+	}
+	if value.Sns != nil {
+		m["sns"] = value.Sns
+	}
+	if value.Sqs != nil {
+		m["sqs"] = value.Sqs
+	}
+	if value.Stomp != nil {
+		m["stomp"] = value.Stomp
+	}
+	if value.Redis != nil {
+		m["redis"] = value.Redis
+	}
+
+	return json.Marshal(m)
 }
 
 func (value *ServerBindings) UnmarshalJSON(data []byte) error {
-	return jsoninfo.UnmarshalStrictStruct(data, value)
+	type ServerBindingsBis ServerBindings
+	var x ServerBindingsBis
+	if err := json.Unmarshal(data, &x); err != nil {
+		return err
+	}
+	_ = json.Unmarshal(data, &x.Extensions)
+
+	delete(x.Extensions, "http")
+	delete(x.Extensions, "ws")
+	delete(x.Extensions, "kafka")
+	delete(x.Extensions, "amqp")
+	delete(x.Extensions, "amqp1")
+	delete(x.Extensions, "mqtt")
+	delete(x.Extensions, "mqtt5")
+	delete(x.Extensions, "nats")
+	delete(x.Extensions, "jms")
+	delete(x.Extensions, "sns")
+	delete(x.Extensions, "sqs")
+	delete(x.Extensions, "stomp")
+	delete(x.Extensions, "redis")
+
+	*value = ServerBindings(x)
+
+	return nil
 }
 
 func (value *ServerBindings) Validate(ctx context.Context) error {
@@ -64,59 +118,21 @@ func (value *ServerBindings) Validate(ctx context.Context) error {
 		}
 	}
 
-	return nil
-}
-
-func (value ServerBindings) JSONLookup(token string) (interface{}, error) {
-	switch token {
-	case "http":
-		return value.Http, nil
-	case "ws":
-		return value.Ws, nil
-	case "kafka":
-		return value.Kafka, nil
-	case "amqp":
-		return value.Amqp, nil
-	case "amqp1":
-		return value.Amqp1, nil
-	case "mqtt":
-		return value.Mqtt, nil
-	case "mqtt5":
-		return value.Mqtt5, nil
-	case "nats":
-		return value.Nats, nil
-	case "jms":
-		return value.Jms, nil
-	case "sns":
-		return value.Sns, nil
-	case "sqs":
-		return value.Sqs, nil
-	case "stomp":
-		return value.Stomp, nil
-	case "redis":
-		return value.Redis, nil
+	if v := value.Kafka; v != nil {
+		if err := v.Validate(ctx); err != nil {
+			return err
+		}
 	}
 
-	v, _, err := jsonpointer.GetForToken(value.ExtensionProps, token)
-	return v, err
+	return nil
 }
 
 type ChannelsBindings map[string]*ChannelBindings
 
-var _ jsonpointer.JSONPointable = (*ChannelsBindings)(nil)
-
-func (h ChannelsBindings) JSONLookup(token string) (interface{}, error) {
-	value, ok := h[token]
-	if value == nil || !ok {
-		return nil, fmt.Errorf("object has no field %q", token)
-	}
-
-	return value, nil
-}
-
 // ChannelBindings is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#channel-bindings-object
 type ChannelBindings struct {
-	openapi3.ExtensionProps
+	Extensions map[string]interface{} `json:"-" yaml:"-"`
+
 	Http  *bindings.HttpChannel  `json:"http,omitempty" yaml:"http,omitempty"`
 	Ws    *bindings.WsChannel    `json:"ws,omitempty" yaml:"ws,omitempty"`
 	Kafka *bindings.KafkaChannel `json:"kafka,omitempty" yaml:"kafka,omitempty"`
@@ -132,14 +148,80 @@ type ChannelBindings struct {
 	Redis interface{}            `json:"redis,omitempty" yaml:"redis,omitempty"`
 }
 
-var _ jsonpointer.JSONPointable = (*ChannelBindings)(nil)
-
 func (value *ChannelBindings) MarshalJSON() ([]byte, error) {
-	return jsoninfo.MarshalStrictStruct(value)
+	m := make(map[string]interface{}, 13+len(value.Extensions))
+	for k, v := range value.Extensions {
+		m[k] = v
+	}
+
+	if value.Http != nil {
+		m["http"] = value.Http
+	}
+	if value.Ws != nil {
+		m["ws"] = value.Ws
+	}
+	if value.Kafka != nil {
+		m["kafka"] = value.Kafka
+	}
+	if value.Amqp != nil {
+		m["amqp"] = value.Amqp
+	}
+	if value.Amqp1 != nil {
+		m["amqp1"] = value.Amqp1
+	}
+	if value.Mqtt != nil {
+		m["mqtt"] = value.Mqtt
+	}
+	if value.Mqtt5 != nil {
+		m["mqtt5"] = value.Mqtt5
+	}
+	if value.Nats != nil {
+		m["nats"] = value.Nats
+	}
+	if value.Jms != nil {
+		m["jms"] = value.Jms
+	}
+	if value.Sns != nil {
+		m["sns"] = value.Sns
+	}
+	if value.Sqs != nil {
+		m["sqs"] = value.Sqs
+	}
+	if value.Stomp != nil {
+		m["stomp"] = value.Stomp
+	}
+	if value.Redis != nil {
+		m["redis"] = value.Redis
+	}
+
+	return json.Marshal(m)
 }
 
 func (value *ChannelBindings) UnmarshalJSON(data []byte) error {
-	return jsoninfo.UnmarshalStrictStruct(data, value)
+	type ChannelBindingsBis ChannelBindings
+	var x ChannelBindingsBis
+	if err := json.Unmarshal(data, &x); err != nil {
+		return err
+	}
+	_ = json.Unmarshal(data, &x.Extensions)
+
+	delete(x.Extensions, "http")
+	delete(x.Extensions, "ws")
+	delete(x.Extensions, "kafka")
+	delete(x.Extensions, "amqp")
+	delete(x.Extensions, "amqp1")
+	delete(x.Extensions, "mqtt")
+	delete(x.Extensions, "mqtt5")
+	delete(x.Extensions, "nats")
+	delete(x.Extensions, "jms")
+	delete(x.Extensions, "sns")
+	delete(x.Extensions, "sqs")
+	delete(x.Extensions, "stomp")
+	delete(x.Extensions, "redis")
+
+	*value = ChannelBindings(x)
+
+	return nil
 }
 
 func (value *ChannelBindings) Validate(ctx context.Context) error {
@@ -158,79 +240,102 @@ func (value *ChannelBindings) Validate(ctx context.Context) error {
 	return nil
 }
 
-func (value ChannelBindings) JSONLookup(token string) (interface{}, error) {
-	switch token {
-	case "http":
-		return value.Http, nil
-	case "ws":
-		return value.Ws, nil
-	case "kafka":
-		return value.Kafka, nil
-	case "amqp":
-		return value.Amqp, nil
-	case "amqp1":
-		return value.Amqp1, nil
-	case "mqtt":
-		return value.Mqtt, nil
-	case "mqtt5":
-		return value.Mqtt5, nil
-	case "nats":
-		return value.Nats, nil
-	case "jms":
-		return value.Jms, nil
-	case "sns":
-		return value.Sns, nil
-	case "sqs":
-		return value.Sqs, nil
-	case "stomp":
-		return value.Stomp, nil
-	case "redis":
-		return value.Redis, nil
-	}
-
-	v, _, err := jsonpointer.GetForToken(value.ExtensionProps, token)
-	return v, err
-}
-
 type OperationsBindings map[string]*OperationBindings
-
-var _ jsonpointer.JSONPointable = (*OperationsBindings)(nil)
-
-func (h OperationsBindings) JSONLookup(token string) (interface{}, error) {
-	value, ok := h[token]
-	if value == nil || !ok {
-		return nil, fmt.Errorf("object has no field %q", token)
-	}
-
-	return value, nil
-}
 
 // OperationBindings is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#operation-bindings-object
 type OperationBindings struct {
-	openapi3.ExtensionProps
+	Extensions map[string]interface{} `json:"-" yaml:"-"`
+
 	Http  *bindings.HttpOperation  `json:"http,omitempty" yaml:"http,omitempty"`
 	Ws    *bindings.WsOperation    `json:"ws,omitempty" yaml:"ws,omitempty"`
 	Kafka *bindings.KafkaOperation `json:"kafka,omitempty" yaml:"kafka,omitempty"`
-	Amqp  interface{}              `json:"amqp,omitempty" yaml:"amqp,omitempty"`
-	Amqp1 interface{}              `json:"amqp1,omitempty" yaml:"amqp1,omitempty"`
-	Mqtt  interface{}              `json:"mqtt,omitempty" yaml:"mqtt,omitempty"`
-	Mqtt5 interface{}              `json:"mqtt5,omitempty" yaml:"mqtt5,omitempty"`
-	Nats  interface{}              `json:"nats,omitempty" yaml:"nats,omitempty"`
-	Jms   interface{}              `json:"jms,omitempty" yaml:"jms,omitempty"`
-	Sns   interface{}              `json:"sns,omitempty" yaml:"sns,omitempty"`
-	Sqs   interface{}              `json:"sqs,omitempty" yaml:"sqs,omitempty"`
-	Stomp interface{}              `json:"stomp,omitempty" yaml:"stomp,omitempty"`
-	Redis interface{}              `json:"redis,omitempty" yaml:"redis,omitempty"`
+
+	Amqp  interface{} `json:"amqp,omitempty" yaml:"amqp,omitempty"`
+	Amqp1 interface{} `json:"amqp1,omitempty" yaml:"amqp1,omitempty"`
+	Mqtt  interface{} `json:"mqtt,omitempty" yaml:"mqtt,omitempty"`
+	Mqtt5 interface{} `json:"mqtt5,omitempty" yaml:"mqtt5,omitempty"`
+	Nats  interface{} `json:"nats,omitempty" yaml:"nats,omitempty"`
+	Jms   interface{} `json:"jms,omitempty" yaml:"jms,omitempty"`
+	Sns   interface{} `json:"sns,omitempty" yaml:"sns,omitempty"`
+	Sqs   interface{} `json:"sqs,omitempty" yaml:"sqs,omitempty"`
+	Stomp interface{} `json:"stomp,omitempty" yaml:"stomp,omitempty"`
+	Redis interface{} `json:"redis,omitempty" yaml:"redis,omitempty"`
 }
 
-var _ jsonpointer.JSONPointable = (*OperationBindings)(nil)
-
 func (value *OperationBindings) MarshalJSON() ([]byte, error) {
-	return jsoninfo.MarshalStrictStruct(value)
+	m := make(map[string]interface{}, 13+len(value.Extensions))
+	for k, v := range value.Extensions {
+		m[k] = v
+	}
+
+	if value.Http != nil {
+		m["http"] = value.Http
+	}
+	if value.Ws != nil {
+		m["ws"] = value.Ws
+	}
+	if value.Kafka != nil {
+		m["kafka"] = value.Kafka
+	}
+	if value.Amqp != nil {
+		m["amqp"] = value.Amqp
+	}
+	if value.Amqp1 != nil {
+		m["amqp1"] = value.Amqp1
+	}
+	if value.Mqtt != nil {
+		m["mqtt"] = value.Mqtt
+	}
+	if value.Mqtt5 != nil {
+		m["mqtt5"] = value.Mqtt5
+	}
+	if value.Nats != nil {
+		m["nats"] = value.Nats
+	}
+	if value.Jms != nil {
+		m["jms"] = value.Jms
+	}
+	if value.Sns != nil {
+		m["sns"] = value.Sns
+	}
+	if value.Sqs != nil {
+		m["sqs"] = value.Sqs
+	}
+	if value.Stomp != nil {
+		m["stomp"] = value.Stomp
+	}
+	if value.Redis != nil {
+		m["redis"] = value.Redis
+	}
+
+	return json.Marshal(m)
 }
 
 func (value *OperationBindings) UnmarshalJSON(data []byte) error {
-	return jsoninfo.UnmarshalStrictStruct(data, value)
+	type OperationBindingsBis OperationBindings
+	var x OperationBindingsBis
+	if err := json.Unmarshal(data, &x); err != nil {
+		return err
+	}
+	_ = json.Unmarshal(data, &x.Extensions)
+
+	delete(x.Extensions, "http")
+	delete(x.Extensions, "ws")
+	delete(x.Extensions, "kafka")
+	delete(x.Extensions, "amqp")
+	delete(x.Extensions, "amqp1")
+	delete(x.Extensions, "mqtt")
+	delete(x.Extensions, "mqtt5")
+	delete(x.Extensions, "nats")
+	delete(x.Extensions, "jms")
+	delete(x.Extensions, "sns")
+	delete(x.Extensions, "sqs")
+	delete(x.Extensions, "stomp")
+	delete(x.Extensions, "redis")
+
+	*value = OperationBindings(x)
+
+	return nil
 }
 
 func (value *OperationBindings) Validate(ctx context.Context) error {
@@ -246,82 +351,111 @@ func (value *OperationBindings) Validate(ctx context.Context) error {
 		}
 	}
 
-	return nil
-}
-
-func (value OperationBindings) JSONLookup(token string) (interface{}, error) {
-	switch token {
-	case "http":
-		return value.Http, nil
-	case "ws":
-		return value.Ws, nil
-	case "kafka":
-		return value.Kafka, nil
-	case "amqp":
-		return value.Amqp, nil
-	case "amqp1":
-		return value.Amqp1, nil
-	case "mqtt":
-		return value.Mqtt, nil
-	case "mqtt5":
-		return value.Mqtt5, nil
-	case "nats":
-		return value.Nats, nil
-	case "jms":
-		return value.Jms, nil
-	case "sns":
-		return value.Sns, nil
-	case "sqs":
-		return value.Sqs, nil
-	case "stomp":
-		return value.Stomp, nil
-	case "redis":
-		return value.Redis, nil
+	if v := value.Kafka; v != nil {
+		if err := v.Validate(ctx); err != nil {
+			return err
+		}
 	}
 
-	v, _, err := jsonpointer.GetForToken(value.ExtensionProps, token)
-	return v, err
+	return nil
 }
 
 type MessagesBindings map[string]*MessageBindings
 
-var _ jsonpointer.JSONPointable = (*MessagesBindings)(nil)
-
-func (h MessagesBindings) JSONLookup(token string) (interface{}, error) {
-	value, ok := h[token]
-	if value == nil || !ok {
-		return nil, fmt.Errorf("object has no field %q", token)
-	}
-
-	return value, nil
-}
-
 // MessageBindings is defined in AsyncAPI spec: https://github.com/asyncapi/spec/blob/2.0.0/versions/2.0.0/asyncapi.md#message-bindings-object
 type MessageBindings struct {
-	openapi3.ExtensionProps
+	Extensions map[string]interface{} `json:"-" yaml:"-"`
+
 	Http  *bindings.HttpMessage  `json:"http,omitempty" yaml:"http,omitempty"`
 	Ws    *bindings.WsMessage    `json:"ws,omitempty" yaml:"ws,omitempty"`
 	Kafka *bindings.KafkaMessage `json:"kafka,omitempty" yaml:"kafka,omitempty"`
-	Amqp  interface{}            `json:"amqp,omitempty" yaml:"amqp,omitempty"`
-	Amqp1 interface{}            `json:"amqp1,omitempty" yaml:"amqp1,omitempty"`
-	Mqtt  interface{}            `json:"mqtt,omitempty" yaml:"mqtt,omitempty"`
-	Mqtt5 interface{}            `json:"mqtt5,omitempty" yaml:"mqtt5,omitempty"`
-	Nats  interface{}            `json:"nats,omitempty" yaml:"nats,omitempty"`
-	Jms   interface{}            `json:"jms,omitempty" yaml:"jms,omitempty"`
-	Sns   interface{}            `json:"sns,omitempty" yaml:"sns,omitempty"`
-	Sqs   interface{}            `json:"sqs,omitempty" yaml:"sqs,omitempty"`
-	Stomp interface{}            `json:"stomp,omitempty" yaml:"stomp,omitempty"`
-	Redis interface{}            `json:"redis,omitempty" yaml:"redis,omitempty"`
+
+	Amqp  interface{} `json:"amqp,omitempty" yaml:"amqp,omitempty"`
+	Amqp1 interface{} `json:"amqp1,omitempty" yaml:"amqp1,omitempty"`
+	Mqtt  interface{} `json:"mqtt,omitempty" yaml:"mqtt,omitempty"`
+	Mqtt5 interface{} `json:"mqtt5,omitempty" yaml:"mqtt5,omitempty"`
+	Nats  interface{} `json:"nats,omitempty" yaml:"nats,omitempty"`
+	Jms   interface{} `json:"jms,omitempty" yaml:"jms,omitempty"`
+	Sns   interface{} `json:"sns,omitempty" yaml:"sns,omitempty"`
+	Sqs   interface{} `json:"sqs,omitempty" yaml:"sqs,omitempty"`
+	Stomp interface{} `json:"stomp,omitempty" yaml:"stomp,omitempty"`
+	Redis interface{} `json:"redis,omitempty" yaml:"redis,omitempty"`
 }
 
-var _ jsonpointer.JSONPointable = (*MessageBindings)(nil)
-
 func (value *MessageBindings) MarshalJSON() ([]byte, error) {
-	return jsoninfo.MarshalStrictStruct(value)
+	m := make(map[string]interface{}, 13+len(value.Extensions))
+	for k, v := range value.Extensions {
+		m[k] = v
+	}
+
+	if value.Http != nil {
+		m["http"] = value.Http
+	}
+	if value.Ws != nil {
+		m["ws"] = value.Ws
+	}
+	if value.Kafka != nil {
+		m["kafka"] = value.Kafka
+	}
+	if value.Amqp != nil {
+		m["amqp"] = value.Amqp
+	}
+	if value.Amqp1 != nil {
+		m["amqp1"] = value.Amqp1
+	}
+	if value.Mqtt != nil {
+		m["mqtt"] = value.Mqtt
+	}
+	if value.Mqtt5 != nil {
+		m["mqtt5"] = value.Mqtt5
+	}
+	if value.Nats != nil {
+		m["nats"] = value.Nats
+	}
+	if value.Jms != nil {
+		m["jms"] = value.Jms
+	}
+	if value.Sns != nil {
+		m["sns"] = value.Sns
+	}
+	if value.Sqs != nil {
+		m["sqs"] = value.Sqs
+	}
+	if value.Stomp != nil {
+		m["stomp"] = value.Stomp
+	}
+	if value.Redis != nil {
+		m["redis"] = value.Redis
+	}
+
+	return json.Marshal(m)
 }
 
 func (value *MessageBindings) UnmarshalJSON(data []byte) error {
-	return jsoninfo.UnmarshalStrictStruct(data, value)
+	type MessageBindingsBis MessageBindings
+	var x MessageBindingsBis
+	if err := json.Unmarshal(data, &x); err != nil {
+		return err
+	}
+	_ = json.Unmarshal(data, &x.Extensions)
+
+	delete(x.Extensions, "http")
+	delete(x.Extensions, "ws")
+	delete(x.Extensions, "kafka")
+	delete(x.Extensions, "amqp")
+	delete(x.Extensions, "amqp1")
+	delete(x.Extensions, "mqtt")
+	delete(x.Extensions, "mqtt5")
+	delete(x.Extensions, "nats")
+	delete(x.Extensions, "jms")
+	delete(x.Extensions, "sns")
+	delete(x.Extensions, "sqs")
+	delete(x.Extensions, "stomp")
+	delete(x.Extensions, "redis")
+
+	*value = MessageBindings(x)
+
+	return nil
 }
 
 func (value *MessageBindings) Validate(ctx context.Context) error {
@@ -337,39 +471,11 @@ func (value *MessageBindings) Validate(ctx context.Context) error {
 		}
 	}
 
-	return nil
-}
-
-func (value MessageBindings) JSONLookup(token string) (interface{}, error) {
-	switch token {
-	case "http":
-		return value.Http, nil
-	case "ws":
-		return value.Ws, nil
-	case "kafka":
-		return value.Kafka, nil
-	case "amqp":
-		return value.Amqp, nil
-	case "amqp1":
-		return value.Amqp1, nil
-	case "mqtt":
-		return value.Mqtt, nil
-	case "mqtt5":
-		return value.Mqtt5, nil
-	case "nats":
-		return value.Nats, nil
-	case "jms":
-		return value.Jms, nil
-	case "sns":
-		return value.Sns, nil
-	case "sqs":
-		return value.Sqs, nil
-	case "stomp":
-		return value.Stomp, nil
-	case "redis":
-		return value.Redis, nil
+	if v := value.Kafka; v != nil {
+		if err := v.Validate(ctx); err != nil {
+			return err
+		}
 	}
 
-	v, _, err := jsonpointer.GetForToken(value.ExtensionProps, token)
-	return v, err
+	return nil
 }
