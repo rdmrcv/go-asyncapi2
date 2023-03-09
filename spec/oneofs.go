@@ -72,7 +72,7 @@ func (value *MessageOneOf) UnmarshalJSON(data []byte) error {
 		return json.Unmarshal(data, value.Value)
 	}
 
-	ents := make([]*MessageRef, 0, len(oneof.OneOf))
+	value.OneOf = make([]*MessageRef, 0, len(oneof.OneOf))
 	for _, ent := range oneof.OneOf {
 		entModel := MessageRef{
 			Value: &Message{},
@@ -89,11 +89,11 @@ func (value *MessageOneOf) UnmarshalJSON(data []byte) error {
 			continue
 		}
 
-		if err := json.Unmarshal(ent, value.Value); err != nil {
+		if err := json.Unmarshal(ent, entModel.Value); err != nil {
 			return err
 		}
 
-		ents = append(ents, &entModel)
+		value.OneOf = append(value.OneOf, &entModel)
 	}
 
 	return nil
