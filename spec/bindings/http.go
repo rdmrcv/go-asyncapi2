@@ -114,7 +114,7 @@ func (binding *HttpOperation) Validate(ctx context.Context) error {
 	}
 
 	if v := binding.Query; v != nil {
-		if v.Type != "object" || len(v.Properties) == 0 {
+		if !v.Type.Is(openapi3.TypeObject) || len(v.Properties) == 0 {
 			return fmt.Errorf(
 				"the schema in the query field MUST be of type object and have a properties key: %w",
 				validate.ErrWrongField,
@@ -171,7 +171,7 @@ func (value *HttpMessage) UnmarshalJSON(data []byte) error {
 
 func (value *HttpMessage) Validate(ctx context.Context) error {
 	if v := value.Headers; v != nil {
-		if v.Type != "object" || len(v.Properties) == 0 {
+		if !v.Type.Is(openapi3.TypeObject) || len(v.Properties) == 0 {
 			return fmt.Errorf(
 				"the schema in the headers field MUST be of type object and have a properties key: %w",
 				validate.ErrWrongField,
